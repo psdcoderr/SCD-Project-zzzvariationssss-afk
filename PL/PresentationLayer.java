@@ -37,6 +37,8 @@ public class PresentationLayer {
                 }
                 case 2: {
                     // Update book
+                    //Safety check added. Book Checked first and if it is present,
+                    //only then is the command executed.
                 	 System.out.println("Enter book name to search:");
                      btitle = scanner.nextLine().trim();
                      if (businessLayer.checkBook(btitle)) {
@@ -55,6 +57,16 @@ public class PresentationLayer {
                 }
                 case 3:
                     // Delete Books
+                    //Safety check added. Book Checked first and if it is present,
+                    //only then is the command executed.
+                    System.out.println("Enter Title of book to Delete:");
+                	String bTitle = scanner.nextLine();
+                	 if (businessLayer.checkBook(bTitle)) {
+                		 businessLayer.delBook(bTitle);                		 
+                	 }
+                	 else {
+                         System.out.println("Book Not found!");
+                     }
                     break;
                 case 4: {
                     // View all books

@@ -20,4 +20,7 @@ public class BusinessLayer {
     public void updateBook(String btitle, String ubtitle, String a, String yp) {
         DAO.updateBook(btitle, ubtitle, a, yp);
     }
+    public void delBook(String title) {
+        DAO.deleteBook(title);
+    }
 }

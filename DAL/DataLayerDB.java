@@ -75,5 +75,16 @@ public class DataLayerDB implements DBInterfaceFacade{
         }
     }
 
- 
+     @Override
+    public void deleteBook(String title) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String delval = "DELETE FROM books WHERE b_title = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(delval)) {
+                preparedStatement.setString(1, title);
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
