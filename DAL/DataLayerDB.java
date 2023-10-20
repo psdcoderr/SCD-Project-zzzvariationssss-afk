@@ -5,11 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -18,20 +13,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataLayerDB implements DBInterfaceFacade{
+public class DataLayerDB implements DBInterfaceFacade {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "";
-    //Created a connection with database and added values to data(Moiz)
+
     @Override
     public void addData(String btitle, String a, String yp) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            //can directly use 	String insertQuery = "INSERT INTO books (title, author, year_passed) VALUES (btitle, a, yp)";
-        	String insertIntoTable = "INSERT INTO books (b_title, author, yp) VALUES (?, ?, ?)";
-            //prepared statement object created.
-        	try (PreparedStatement ValforExec = connection.prepareStatement(insertIntoTable)) {
-                //data set.
-            	ValforExec.setString(1, btitle);
+            String insertIntoTable = "INSERT INTO books (b_title, author, yp) VALUES (?, ?, ?)";
+            try (PreparedStatement ValforExec = connection.prepareStatement(insertIntoTable)) {
+                ValforExec.setString(1, btitle);
                 ValforExec.setString(2, a);
                 ValforExec.setString(3, yp);
                 ValforExec.executeUpdate();
@@ -40,8 +32,7 @@ public class DataLayerDB implements DBInterfaceFacade{
             e.printStackTrace();
         }
     }
-    //code to add data integrity(i.e. check if
-    //data is there to avoid errors).
+
     @Override
     public boolean checkBook(String bname) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
@@ -57,8 +48,7 @@ public class DataLayerDB implements DBInterfaceFacade{
             return false;
         }
     }
-    
-    //Update book operation.
+
     @Override
     public void updateBook(String btitle, String ubtitle, String a, String yp) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
@@ -75,7 +65,7 @@ public class DataLayerDB implements DBInterfaceFacade{
         }
     }
 
-     @Override
+    @Override
     public void deleteBook(String title) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String delval = "DELETE FROM books WHERE b_title = ?";
@@ -87,7 +77,8 @@ public class DataLayerDB implements DBInterfaceFacade{
             e.printStackTrace();
         }
     }
-        @Override
+
+    @Override
     public List<String> showAllBooks() {
         List<String> allBooksData = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
@@ -95,9 +86,9 @@ public class DataLayerDB implements DBInterfaceFacade{
             try (PreparedStatement GetBooks = connection.prepareStatement(selectQuery)) {
                 try (ResultSet resultSet = GetBooks.executeQuery()) {
                     while (resultSet.next()) {
-                        String title = resultSet.getString("title");
+                        String title = resultSet.getString("b_title");
                         String author = resultSet.getString("author");
-                        String yearPassed = resultSet.getString("year_passed");
+                        String yearPassed = resultSet.getString("yp");
                         allBooksData.add("Name: " + title + " Author: " + author + " Passing Away Year: " + yearPassed);
                     }
                 }
@@ -107,5 +98,4 @@ public class DataLayerDB implements DBInterfaceFacade{
         }
         return allBooksData;
     }
-
 }
