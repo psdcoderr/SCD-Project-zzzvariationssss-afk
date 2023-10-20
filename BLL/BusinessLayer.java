@@ -10,7 +10,7 @@ public class BusinessLayer {
     public BusinessLayer(DataLayerDB DAO) {
         this.DAO = DAO;
     }
-
+//(Checking other commit)
     public void addData(String btitle, String a, String yp) {
         DAO.addData(btitle, a, yp);
     }
