@@ -1,5 +1,7 @@
 package BLL;
 
+import java.util.List;
+
 import DAL.DBInterfaceFacade;
 
 public class BusinessLayer {
@@ -22,5 +24,8 @@ public class BusinessLayer {
     }
     public void delBook(String title) {
         DAO.deleteBook(title);
+    }
+    public List<String> ShowAllBooks() {
+        return DAO.showAllBooks();
     }
 }

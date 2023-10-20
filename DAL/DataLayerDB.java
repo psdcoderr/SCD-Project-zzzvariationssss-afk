@@ -87,4 +87,25 @@ public class DataLayerDB implements DBInterfaceFacade{
             e.printStackTrace();
         }
     }
+        @Override
+    public List<String> showAllBooks() {
+        List<String> allBooksData = new ArrayList<>();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String selectQuery = "SELECT b_title, author, yp FROM books";
+            try (PreparedStatement GetBooks = connection.prepareStatement(selectQuery)) {
+                try (ResultSet resultSet = GetBooks.executeQuery()) {
+                    while (resultSet.next()) {
+                        String title = resultSet.getString("title");
+                        String author = resultSet.getString("author");
+                        String yearPassed = resultSet.getString("year_passed");
+                        allBooksData.add("Name: " + title + " Author: " + author + " Passing Away Year: " + yearPassed);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return allBooksData;
+    }
+
 }

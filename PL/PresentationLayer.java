@@ -2,7 +2,8 @@ package PL;
 
 import java.util.List;
 import java.util.Scanner;
-
+import java.util.ArrayList;
+import java.util.List;
 import BLL.BusinessLayer;
 import DAL.DataLayerDB;
 
@@ -70,6 +71,10 @@ public class PresentationLayer {
                     break;
                 case 4: {
                     // View all books
+                    List<String> TempShowData = businessLayer.ShowAllBooks();
+                    for (String x : TempShowData) {
+                        System.out.println(x);
+                    }
                     break;
                 }
                 case 5:
