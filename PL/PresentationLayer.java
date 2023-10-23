@@ -1,106 +1,175 @@
 package PL;
-
-import java.util.Scanner;
-import java.util.ArrayList;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
 import BLL.BusinessLayer;
+import DAL.DBInterfaceFacade;
 import DAL.DataLayerDB;
+import DTO.BooksDTO;
 
-public class PresentationLayer {
+public class PresentationLayer extends JFrame {
+    private BusinessLayer businessLayer;
+    private JTextField titleField;
+    private JTextField authorField;
+    private JTextField yearPassedField;
+    private JTextArea resultArea;
 
-    private static final Scanner scanner = new Scanner(System.in);
-    private static BusinessLayer businessLayer;
+    public PresentationLayer(BusinessLayer businessLayer) {
+        this.businessLayer = businessLayer;
 
-    public PresentationLayer(BusinessLayer businessLayerr) {
-        this.businessLayer = businessLayerr;
-        String btitle;
-        String author;
-        String Yearpassed;
-        boolean a = false;
+        setTitle("Book Management System");
+        setSize(400, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        while (!a) {
-            System.out.println(
-                    "Enter Choice:\n1) For adding Book\n2) For Updating book\n3) For deleting Book\n4) View books\n5) View Single book\n6) For exit");
-            int ip = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
-            switch (ip) {
-                case 1: {
-                    // Add book
-                    System.out.println("Enter Book title:");
-                    btitle = scanner.nextLine();
-                    System.out.println("Enter Author:");
-                    author = scanner.nextLine();
-                    System.out.println("Enter Passing date:");
-                    Yearpassed = scanner.nextLine();
-                    businessLayer.addData(btitle, author, Yearpassed);
-                    break;
-                }
-                case 2: {
-                    // Update book
-                    //Safety check added. Book Checked first and if it is present,
-                    //only then is the command executed.
-                	 System.out.println("Enter book name to search:");
-                     btitle = scanner.nextLine().trim();
-                     if (businessLayer.checkBook(btitle)) {
-                         System.out.println("Book Found!\nEnter new details:");
-                         System.out.println("Enter New Book title:");
-                         String newBtitle = scanner.nextLine();
-                         System.out.println("Enter Author:");
-                         author = scanner.nextLine();
-                         System.out.println("Enter Passing date:");
-                         Yearpassed = scanner.nextLine();
-                         businessLayer.updateBook(btitle, newBtitle, author, Yearpassed);
-                     } else {
-                         System.out.println("Book Not found!");
-                     }
-                    break;
-                }
-                case 3:
-                    // Delete Books
-                    //Safety check added. Book Checked first and if it is present,
-                    //only then is the command executed.
-                    System.out.println("Enter Title of book to Delete:");
-                	String bTitle = scanner.nextLine();
-                	 if (businessLayer.checkBook(bTitle)) {
-                		 businessLayer.delBook(bTitle);                		 
-                	 }
-                	 else {
-                         System.out.println("Book Not found!");
-                     }
-                    break;
-                case 4: {
-                    // View all books
-                    List<String> TempShowData = businessLayer.ShowAllBooks();
-                    for (String x : TempShowData) {
-                        System.out.println(x);
-                    }
-                    break;
-                }
-                case 5:
-                {
-                    // Show single book by asking only the name
-                    System.out.println("Enter book name:");
-                    btitle = scanner.nextLine().trim();
-                    BooksDTO bookDetails = businessLayer.showSingleBook(btitle);
-                    if (bookDetails != null) {
-                        System.out.println("Book Found!\n Details are:\n" + bookDetails);
-                    } else {
-                        System.out.println("Book Not found!");
-                    }
-                    break;
-                }
-                case 6:
-                {
-                	// End Program.
-                	a = true;
-                	break;                	
-                }
-                default: {
-                    System.out.println("Wrong Choice!");
-                    break;
-                }
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(6, 2));
+
+        JLabel titleLabel = new JLabel("Title:");
+        titleField = new JTextField(20);
+        JLabel authorLabel = new JLabel("Author:");
+        authorField = new JTextField(20);
+        JLabel yearPassedLabel = new JLabel("Year Passed:");
+        yearPassedField = new JTextField(20);
+
+        JButton addButton = new JButton("Add Book");
+        JButton updateButton = new JButton("Update Book");
+        JButton deleteButton = new JButton("Delete Book");
+        JButton viewButton = new JButton("View All Books");
+        JButton viewSingleButton = new JButton("View Single Book");
+
+
+        resultArea = new JTextArea(10, 30);
+        resultArea.setEditable(false);
+
+        panel.add(titleLabel);
+        panel.add(titleField);
+        panel.add(authorLabel);
+        panel.add(authorField);
+        panel.add(yearPassedLabel);
+        panel.add(yearPassedField);
+        panel.add(addButton);
+        panel.add(updateButton);
+        panel.add(deleteButton);
+        panel.add(viewButton);
+        panel.add(viewSingleButton);
+
+        JScrollPane scrollPane = new JScrollPane(resultArea);
+
+        panel.add(scrollPane);
+
+        add(panel, BorderLayout.CENTER);
+
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addBook();
             }
+        });
+
+        updateButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                updateBook();
+            }
+        });
+
+        deleteButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                deleteBook();
+            }
+        });
+
+        viewButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                viewAllBooks();
+            }
+        });
+        
+        viewSingleButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                viewSingleBook();
+            }
+        });
+
+    }
+
+    private void addBook() {
+        String title = titleField.getText();
+        String author = authorField.getText();
+        String yearPassed = yearPassedField.getText();
+        businessLayer.addData(title, author, yearPassed);
+        clearFields();
+        resultArea.setText("Book added successfully.");
+    }
+
+    private void updateBook() {
+        String title = titleField.getText();
+        String author = authorField.getText();
+        String yearPassed = yearPassedField.getText();
+        String newTitle = JOptionPane.showInputDialog("Enter new title:");
+        businessLayer.updateBook(title, newTitle, author, yearPassed);
+        clearFields();
+        resultArea.setText("Book updated successfully.");
+    }
+
+    private void deleteBook() {
+        String title = titleField.getText();
+        businessLayer.delBook(title);
+        clearFields();
+        resultArea.setText("Book deleted successfully.");
+    }
+
+    private void viewAllBooks() {
+        List<BooksDTO> allBooks = businessLayer.ShowAllBooks();
+        resultArea.setText("");
+        for (BooksDTO book : allBooks) {
+            resultArea.append(book + "\n");
         }
     }
-}
 
+    private void clearFields() {
+        titleField.setText("");
+        authorField.setText("");
+        yearPassedField.setText("");
+    }
+    
+    private void viewSingleBook() {
+        String title = titleField.getText().trim();
+        if (!title.isEmpty()) {
+            BooksDTO book = businessLayer.showSingleBook(title);
+            if (book != null) {
+                resultArea.setText("Book Found!\nDetails are:\n" +
+                                   "Title: " + book.getTitle() +
+                                   "\nAuthor: " + book.getAuthor() +
+                                   "\nYear Passed: " + book.getYearPassed());
+            } else {
+                resultArea.setText("Book Not found!");
+            }
+        } else {
+            resultArea.setText("Please enter a title to search.");
+        }
+    }
+
+
+    public static void main(String[] args) {
+        DBInterfaceFacade dataAccess = new DataLayerDB();
+        BusinessLayer businessLayer = new BusinessLayer(dataAccess);
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new PresentationLayer(businessLayer).setVisible(true);
+            }
+        });
+    }
+}
