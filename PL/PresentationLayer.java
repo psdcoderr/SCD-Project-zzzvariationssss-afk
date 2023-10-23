@@ -20,7 +20,7 @@ public class PresentationLayer {
 
         while (!a) {
             System.out.println(
-                    "Enter Choice:\n1) For adding Book\n2) For Updating book\n3) For deleting Book\n4) View books\n5) For exit");
+                    "Enter Choice:\n1) For adding Book\n2) For Updating book\n3) For deleting Book\n4) View books\n5) View Single book\n6) For exit");
             int ip = scanner.nextInt();
             scanner.nextLine(); // Consume newline
             switch (ip) {
@@ -77,9 +77,24 @@ public class PresentationLayer {
                     break;
                 }
                 case 5:
-                    // End Program.
-                    a = true;
+                {
+                    // Show single book by asking only the name
+                    System.out.println("Enter book name:");
+                    btitle = scanner.nextLine().trim();
+                    BooksDTO bookDetails = businessLayer.showSingleBook(btitle);
+                    if (bookDetails != null) {
+                        System.out.println("Book Found!\n Details are:\n" + bookDetails);
+                    } else {
+                        System.out.println("Book Not found!");
+                    }
                     break;
+                }
+                case 6:
+                {
+                	// End Program.
+                	a = true;
+                	break;                	
+                }
                 default: {
                     System.out.println("Wrong Choice!");
                     break;
