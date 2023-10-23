@@ -25,6 +25,24 @@ public class DataLayerRoots implements Roots_Interface {
             e.printStackTrace();
         }
     }
-}
+
 
 //This is add funtion of Roots
+
+   @Override
+    public boolean checkRoot(String rName) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String selectQuery = "SELECT root FROM Roots WHERE root = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+                preparedStatement.setString(1, rName);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return resultSet.next();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    //This is check function of roots
+}
