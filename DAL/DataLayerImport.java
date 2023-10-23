@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-public class DataLayerImport {
+public class DataLayerImport implements Import_Interface{
     private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "12345";
@@ -33,3 +33,28 @@ public class DataLayerImport {
 }
 //DAL(DATA ACCESS LAYER)
 //Connected to DB for Data Insertion
+  public int CheckBookByNameAndAuthor(String title, String author) {
+      int bookId = -1;
+      try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+          String selectQuery = "SELECT b_id FROM Books WHERE b_title = ? AND author = ?";
+          try (PreparedStatement statement = con.prepareStatement(selectQuery)) {
+              statement.setString(1, title);
+              statement.setString(2, author);
+              try (ResultSet resultSet = statement.executeQuery()) {
+                  if (resultSet.next()) {
+                      bookId = resultSet.getInt("b_id");
+                  }
+              }
+          } catch (SQLException e) {
+              e.printStackTrace();
+          }
+      } catch (SQLException e1) {
+          e1.printStackTrace();
+      }
+      return bookId;
+  }
+  //CheckBookByNameAndAuthor
+  //The CheckBookByNameAndAuthor function checks book by title and author 
+   //returns its book ID (b_id) if found
+  // -1 if not found. 
+  
