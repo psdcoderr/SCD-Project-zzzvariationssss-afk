@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import DTO.BooksDTO;
+
 public class DataLayerDB implements DBInterfaceFacade {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
     private static final String DB_USER = "root";
@@ -78,24 +80,47 @@ public class DataLayerDB implements DBInterfaceFacade {
         }
     }
 
-    @Override
-    public List<String> showAllBooks() {
-        List<String> allBooksData = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String selectQuery = "SELECT b_title, author, yp FROM books";
-            try (PreparedStatement GetBooks = connection.prepareStatement(selectQuery)) {
-                try (ResultSet resultSet = GetBooks.executeQuery()) {
-                    while (resultSet.next()) {
-                        String title = resultSet.getString("b_title");
-                        String author = resultSet.getString("author");
-                        String yearPassed = resultSet.getString("yp");
-                        allBooksData.add("Name: " + title + " Author: " + author + " Passing Away Year: " + yearPassed);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return allBooksData;
-    }
+    	  @Override
+	    public List<BooksDTO> showAllBooks() {
+	        List<BooksDTO> allBooksData = new ArrayList<>();
+	        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+	            String selectQuery = "SELECT b_title, author, yp FROM books";
+	            try (PreparedStatement GetBooks = connection.prepareStatement(selectQuery)) {
+	                try (ResultSet resultSet = GetBooks.executeQuery()) {
+	                    while (resultSet.next()) {
+	                        String title = resultSet.getString("b_title");
+	                        String author = resultSet.getString("author");
+	                        String yearPassed = resultSet.getString("yp");
+	                        BooksDTO book = new BooksDTO(title, author, yearPassed);
+	                        allBooksData.add(book);
+	                    }
+	                }
+	            }
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	        return allBooksData;
+	    }
+
+	    @Override
+	    public BooksDTO showSingleBook(String b_title) {
+	        BooksDTO bookDetail = null;
+	        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+	            String selectQuery = "SELECT b_title, author, yp FROM books WHERE b_title = ?";
+	            try (PreparedStatement GetBook = connection.prepareStatement(selectQuery)) {
+	                GetBook.setString(1, b_title);
+	                try (ResultSet resultSet = GetBook.executeQuery()) {
+	                    if (resultSet.next()) {
+	                        String title = resultSet.getString("b_title");
+	                        String author = resultSet.getString("author");
+	                        String yearPassed = resultSet.getString("yp");
+	                        bookDetail = new BooksDTO(title, author, yearPassed);
+	                    }
+	                }
+	            }
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	        return bookDetail;
+	    }
 }
