@@ -57,4 +57,27 @@ public class DataLayerImport implements Import_Interface{
   //The CheckBookByNameAndAuthor function checks book by title and author 
    //returns its book ID (b_id) if found
   // -1 if not found. 
-  
+    //done
+    //poem add and check
+    private int getPoemIdByTitleAndBook(String title, int bookId) {
+        int poemId = -1;
+        try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String selectQuery = "SELECT pid FROM Poems WHERE p_title = ? AND b_id = ?";
+            try (PreparedStatement statement = con.prepareStatement(selectQuery)) {
+                statement.setString(1, title);
+                statement.setInt(2, bookId);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        poemId = resultSet.getInt("pid");
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+        return poemId;
+    }
+//checks for the existence of a poem in a database based on its title and the ID of the book 
+//If the poem is found, its ID is returned. 
