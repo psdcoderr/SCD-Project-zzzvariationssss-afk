@@ -60,4 +60,17 @@ public class DataLayerRoots implements Roots_Interface {
         }
     }
     //This is updateRoots func
+
+        @Override
+    public void deleteRoot(String root) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String deleteQuery = "DELETE FROM Roots WHERE root = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+                preparedStatement.setString(1, root);
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        //this is deletion of roots
 }
