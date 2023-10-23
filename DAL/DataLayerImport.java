@@ -13,7 +13,7 @@ import java.util.Scanner;
 public class DataLayerImport implements Import_Interface{
     private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
     private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "12345";
+    private static final String DB_PASSWORD = "";
 
     //done
     public void addData(String btitle, String a, String yp) {
@@ -30,7 +30,7 @@ public class DataLayerImport implements Import_Interface{
         }
     }
 
-}
+
 //DAL(DATA ACCESS LAYER)
 //Connected to DB for Data Insertion
   public int CheckBookByNameAndAuthor(String title, String author) {
@@ -81,3 +81,17 @@ public class DataLayerImport implements Import_Interface{
     }
 //checks for the existence of a poem in a database based on its title and the ID of the book 
 //If the poem is found, its ID is returned. 
+   //done
+    //@Override
+    public int bookcheckk(String btitle, String author, String yp) {
+        int bookId = CheckBookByNameAndAuthor(btitle, author);
+
+        if (bookId == -1) {
+            addData(btitle, author, yp);
+            bookId = CheckBookByNameAndAuthor(btitle, author);
+        }
+
+        return bookId;
+    }
+}
+//bookcheckk-function for checking book by using Function CheckBookByNameAndAuthor
