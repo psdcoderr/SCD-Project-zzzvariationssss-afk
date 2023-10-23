@@ -116,4 +116,19 @@ public class DataLayerImport implements Import_Interface{
         return poemId;
     }
     //insertPoem-function for checking book by using Function  getPoemIdByTitleAndBook
+      
+   // @Override
+      public void insertVerse(String text, int poemId) {
+        try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String insertQuery = "INSERT INTO Verses (verse, p_id) VALUES (?, ?)";
+            try (PreparedStatement statement = con.prepareStatement(insertQuery)) {
+                statement.setString(1, text);
+                statement.setInt(2, poemId);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+   // adds a method for inserting a verse into the database
 }
