@@ -73,4 +73,25 @@ public class DataLayerRoots implements Roots_Interface {
             e.printStackTrace();
         }
         //this is deletion of roots
+        
+}
+    @Override
+    public List<String> showAllRoots() {
+        List<String> allRootsData = new ArrayList<>();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String selectQuery = "SELECT root FROM Roots";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String root = resultSet.getString("root");
+                        allRootsData.add(root);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return allRootsData;
+    }
+    //this is show function 
 }
