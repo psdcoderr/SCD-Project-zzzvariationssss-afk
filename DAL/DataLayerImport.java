@@ -10,12 +10,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-public class DataLayerImport implements Import_Interface{
+public class DataLayerImport  implements Import_Interface{
     private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
     private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "";
+    private static final String DB_PASSWORD = "12345";
 
     //done
+ 
     public void addData(String btitle, String a, String yp) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String insertIntoTable = "INSERT INTO books (b_title, author, yp) VALUES (?, ?, ?)";
@@ -29,34 +30,27 @@ public class DataLayerImport implements Import_Interface{
             e.printStackTrace();
         }
     }
-
-
-//DAL(DATA ACCESS LAYER)
-//Connected to DB for Data Insertion
-  public int CheckBookByNameAndAuthor(String title, String author) {
-      int bookId = -1;
-      try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-          String selectQuery = "SELECT b_id FROM Books WHERE b_title = ? AND author = ?";
-          try (PreparedStatement statement = con.prepareStatement(selectQuery)) {
-              statement.setString(1, title);
-              statement.setString(2, author);
-              try (ResultSet resultSet = statement.executeQuery()) {
-                  if (resultSet.next()) {
-                      bookId = resultSet.getInt("b_id");
-                  }
-              }
-          } catch (SQLException e) {
-              e.printStackTrace();
-          }
-      } catch (SQLException e1) {
-          e1.printStackTrace();
-      }
-      return bookId;
-  }
-  //CheckBookByNameAndAuthor
-  //The CheckBookByNameAndAuthor function checks book by title and author 
-   //returns its book ID (b_id) if found
-  // -1 if not found. 
+    public int CheckBookByNameAndAuthor(String title, String author) {
+        int bookId = -1;
+        try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String selectQuery = "SELECT b_id FROM Books WHERE b_title = ? AND author = ?";
+            try (PreparedStatement statement = con.prepareStatement(selectQuery)) {
+                statement.setString(1, title);
+                statement.setString(2, author);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        bookId = resultSet.getInt("b_id");
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+        return bookId;
+    }
+    
     //done
     //poem add and check
     private int getPoemIdByTitleAndBook(String title, int bookId) {
@@ -79,9 +73,7 @@ public class DataLayerImport implements Import_Interface{
         }
         return poemId;
     }
-//checks for the existence of a poem in a database based on its title and the ID of the book 
-//If the poem is found, its ID is returned. 
-   //done
+    //done
     //@Override
     public int bookcheckk(String btitle, String author, String yp) {
         int bookId = CheckBookByNameAndAuthor(btitle, author);
@@ -93,8 +85,6 @@ public class DataLayerImport implements Import_Interface{
 
         return bookId;
     }
-
-//bookcheckk-function for checking book by using Function CheckBookByNameAndAuthor 
     //done
    // @Override
     public int insertPoem(String title, int bookId) {
@@ -115,10 +105,10 @@ public class DataLayerImport implements Import_Interface{
         }
         return poemId;
     }
-    //insertPoem-function for checking book by using Function  getPoemIdByTitleAndBook
-      
-   // @Override
-      public void insertVerse(String text, int poemId) {
+  //insertPoem-function for checking book by using Function  getPoemIdByTitleAndBook
+    //done
+    //@Override
+    public void insertVerse(String text, int poemId) {
         try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String insertQuery = "INSERT INTO Verses (verse, p_id) VALUES (?, ?)";
             try (PreparedStatement statement = con.prepareStatement(insertQuery)) {
@@ -130,5 +120,5 @@ public class DataLayerImport implements Import_Interface{
             e.printStackTrace();
         }
     }
-   // adds a method for inserting a verse into the database
+    // adds a method for inserting a verse into the database
 }
