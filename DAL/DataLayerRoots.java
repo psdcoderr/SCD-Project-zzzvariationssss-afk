@@ -45,4 +45,19 @@ public class DataLayerRoots implements Roots_Interface {
         }
     }
     //This is check function of roots
+
+       @Override
+    public void updateRoot(String root, String newRoot) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String updateQuery = "UPDATE Roots SET root = ? WHERE root = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+                preparedStatement.setString(1, newRoot);
+                preparedStatement.setString(2, root);
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    //This is updateRoots func
 }
