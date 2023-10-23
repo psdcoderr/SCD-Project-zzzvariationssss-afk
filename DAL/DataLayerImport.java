@@ -93,5 +93,27 @@ public class DataLayerImport implements Import_Interface{
 
         return bookId;
     }
+
+//bookcheckk-function for checking book by using Function CheckBookByNameAndAuthor 
+    //done
+   // @Override
+    public int insertPoem(String title, int bookId) {
+        int poemId = getPoemIdByTitleAndBook(title, bookId);
+        if (poemId == -1) {
+            try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+                String insertQuery = "INSERT INTO Poems (p_title, b_id) VALUES (?, ?)";
+                try (PreparedStatement statement = con.prepareStatement(insertQuery)) {
+                    statement.setString(1, title);
+                    statement.setInt(2, bookId);
+                    statement.executeUpdate();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return -1;
+            }
+            poemId = getPoemIdByTitleAndBook(title, bookId);
+        }
+        return poemId;
+    }
+    //insertPoem-function for checking book by using Function  getPoemIdByTitleAndBook
 }
-//bookcheckk-function for checking book by using Function CheckBookByNameAndAuthor
