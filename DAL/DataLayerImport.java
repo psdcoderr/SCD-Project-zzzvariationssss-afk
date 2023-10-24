@@ -13,7 +13,7 @@ import java.util.Scanner;
 public class DataLayerImport  implements Import_Interface{
     private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
     private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "12345";
+    private static final String DB_PASSWORD = "";
 
     //done
  
