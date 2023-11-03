@@ -4,6 +4,8 @@ import java.util.List;
 
 import DAL.DBInterfaceFacade;
 
+import DTO.BooksDTO;
+
 public class BusinessLayer {
     private final DBInterfaceFacade DAO;
 //(Moiz)
@@ -25,7 +27,11 @@ public class BusinessLayer {
     public void delBook(String title) {
         DAO.deleteBook(title);
     }
-    public List<String> ShowAllBooks() {
+    public List<BooksDTO> ShowAllBooks() {
         return DAO.showAllBooks();
+    }
+    
+    public BooksDTO showSingleBook(String b_title) {
+        return DAO.showSingleBook(b_title);
     }
 }

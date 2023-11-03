@@ -1,17 +1,21 @@
 package DAL;
+public interface Import_Interface {
 
-public interface PoemInterface {
-
+    //done
 	public void addData(String btitle, String a, String yp);
 
+	//done
 	public int insertPoem(String title, int bookId);
 
+    //done
 	public void insertVerse(String text, int poemId);
 
+    //done
 	public int CheckBookByNameAndAuthor(String title, String author);
 
-	public int bookcheckk();
+    //done
+	public int bookcheckk(String btitle, String author, String yp);
 
-	public void ParsePoems(String fileName);
 
 }
+//This interface`Import_Interface` in the Data Access Layer (DAL) package
