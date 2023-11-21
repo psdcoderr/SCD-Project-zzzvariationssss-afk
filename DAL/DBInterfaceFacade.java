@@ -8,4 +8,6 @@ public interface DBInterfaceFacade {
     void updateBook(String btitle, String ubtitle, String a, String yp);
     List<BooksDTO> showAllBooks();
     BooksDTO showSingleBook(String b_title);
+	void deleteBook(String title);
+    public List<String> show_poems(String b_Name);
 }

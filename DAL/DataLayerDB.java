@@ -123,4 +123,40 @@ public class DataLayerDB implements DBInterfaceFacade {
 	        }
 	        return bookDetail;
 	    }
+	    
+	  //Poem Show function.
+		@Override
+		public List<String> show_poems(String bookName) {
+		    List<String> allPoems = new ArrayList<>();
+		    try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+
+		        String selectBookIdQuery = "SELECT b_id FROM books WHERE b_title = ?";
+		        try (PreparedStatement getBookIdStatement = connection.prepareStatement(selectBookIdQuery)) {
+		            getBookIdStatement.setString(1, bookName);
+
+		            try (ResultSet bookIdResultSet = getBookIdStatement.executeQuery()) {
+		                if (bookIdResultSet.next()) {
+		                    int bookId = bookIdResultSet.getInt("b_id");
+		                    String selectQuery = "SELECT p_title FROM poems WHERE b_id = ?";
+
+		                    try (PreparedStatement getPoemsStatement = connection.prepareStatement(selectQuery)) {
+		                        getPoemsStatement.setInt(1, bookId);
+
+		                        try (ResultSet resultSet = getPoemsStatement.executeQuery()) {
+		                            while (resultSet.next()) {
+		                                String poemTitle = resultSet.getString("p_title");
+		                                allPoems.add(poemTitle);
+		                            }
+		                        }
+		                    }
+		                }
+		            }
+		        }
+		        return allPoems;
+		    } catch (SQLException e) {
+		        e.printStackTrace();
+		        // Handle the exception appropriately, such as logging or throwing a custom exception.
+		        return Collections.emptyList(); // Return an empty list in case of an error.
+		    }
+		}
 }

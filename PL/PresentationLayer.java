@@ -1,175 +1,353 @@
 package PL;
+
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 
 import BLL.BusinessLayer;
+import BLL.BusinessLayerInterface;
 import DAL.DBInterfaceFacade;
 import DAL.DataLayerDB;
 import DTO.BooksDTO;
 
 public class PresentationLayer extends JFrame {
-    private BusinessLayer businessLayer;
-    private JTextField titleField;
-    private JTextField authorField;
-    private JTextField yearPassedField;
-    private JTextArea resultArea;
+	 private BusinessLayerInterface businessLayer;
 
-    public PresentationLayer(BusinessLayer businessLayer) {
-        this.businessLayer = businessLayer;
+	    private JTextField addTitleField, addAuthorField, addYearField;
+	    private JTextField searchField;
+	    private JButton addButton, searchButton, showAllButton;
+	    private JTable booksTable;
+	    private DefaultTableModel tableModel;
 
-        setTitle("Book Management System");
-        setSize(400, 400);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	    private JTable poemsTable;
+	    private DefaultTableModel poemsTableModel;
+	    
+	    public PresentationLayer(BusinessLayerInterface businessLayer) {
+	        this.businessLayer = businessLayer;
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(6, 2));
+	        setTitle("Book Management System");
+	        setSize(800, 600);
+	        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JLabel titleLabel = new JLabel("Title:");
-        titleField = new JTextField(20);
-        JLabel authorLabel = new JLabel("Author:");
-        authorField = new JTextField(20);
-        JLabel yearPassedLabel = new JLabel("Year Passed:");
-        yearPassedField = new JTextField(20);
+	        initComponents();
+	        initLayout();
 
-        JButton addButton = new JButton("Add Book");
-        JButton updateButton = new JButton("Update Book");
-        JButton deleteButton = new JButton("Delete Book");
-        JButton viewButton = new JButton("View All Books");
-        JButton viewSingleButton = new JButton("View Single Book");
+	        booksTable.addMouseListener(new MouseAdapter() {
+	            @Override
+	            public void mouseClicked(MouseEvent e) {
+	                int selectedRow = booksTable.getSelectedRow();
+	                if (selectedRow >= 0 && selectedRow < tableModel.getRowCount()) {
+	                    String selectedTitle = tableModel.getValueAt(selectedRow, 0).toString();
+	                    showPoemsInTable(selectedTitle);
+	                }
+	            }
+	        });
+	    }
 
+    private void initComponents() {
+    	 addTitleField = new JTextField();
+         addAuthorField = new JTextField();
+         addYearField = new JTextField();
+         addButton = new JButton("Add Book");
+         searchField = new JTextField();
+         searchButton = new JButton("Search Book");
+         showAllButton = new JButton("Show All Books");
 
-        resultArea = new JTextArea(10, 30);
-        resultArea.setEditable(false);
+         String[] columnNames = {"Title", "Author", "Year Passed", "Update", "Delete"};
+         tableModel = new DefaultTableModel(columnNames, 0);
+         booksTable = new JTable(tableModel);
+         
+         String[] poemsColumnNames = {"Poem"};
+         poemsTableModel = new DefaultTableModel(poemsColumnNames, 0);
+         poemsTable = new JTable(poemsTableModel);
 
-        panel.add(titleLabel);
-        panel.add(titleField);
-        panel.add(authorLabel);
-        panel.add(authorField);
-        panel.add(yearPassedLabel);
-        panel.add(yearPassedField);
-        panel.add(addButton);
-        panel.add(updateButton);
-        panel.add(deleteButton);
-        panel.add(viewButton);
-        panel.add(viewSingleButton);
+         addButton.addActionListener(new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+                 addBook();
+             }
+         });
 
-        JScrollPane scrollPane = new JScrollPane(resultArea);
+         searchButton.addActionListener(new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+                 searchBook();
+             }
+         });
 
-        panel.add(scrollPane);
+         showAllButton.addActionListener(new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+                 populateTable();
+             }
+         });
 
-        add(panel, BorderLayout.CENTER);
+         booksTable.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
+         booksTable.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(new JTextField()));
+         booksTable.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
+         booksTable.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(new JTextField()));
 
-        addButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                addBook();
-            }
-        });
-
-        updateButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                updateBook();
-            }
-        });
-
-        deleteButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                deleteBook();
-            }
-        });
-
-        viewButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                viewAllBooks();
-            }
-        });
-        
-        viewSingleButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                viewSingleBook();
-            }
-        });
-
+        populateTable();
     }
 
-    private void addBook() {
-        String title = titleField.getText();
-        String author = authorField.getText();
-        String yearPassed = yearPassedField.getText();
-        businessLayer.addData(title, author, yearPassed);
-        clearFields();
-        resultArea.setText("Book added successfully.");
+    private void initLayout() {
+        setLayout(new BorderLayout());
+
+        JPanel addPanel = new JPanel(new GridLayout(4, 2));
+        addPanel.add(new JLabel("Title:"));
+        addPanel.add(addTitleField);
+        addPanel.add(new JLabel("Author:"));
+        addPanel.add(addAuthorField);
+        addPanel.add(new JLabel("Year Passed:"));
+        addPanel.add(addYearField);
+        addPanel.add(new JLabel(""));
+        addPanel.add(addButton);
+
+        JPanel searchPanel = new JPanel(new FlowLayout());
+        JLabel searchLabel = new JLabel("Search Book:");
+        searchField.setColumns(20);
+        searchPanel.add(searchLabel);
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.add(showAllButton);
+
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.add(addPanel, BorderLayout.NORTH);
+        leftPanel.add(searchPanel, BorderLayout.CENTER);
+        leftPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        JPanel tablesPanel = new JPanel(new GridLayout(1, 2));
+
+        JScrollPane booksScrollPane = new JScrollPane(booksTable);
+        JScrollPane poemsScrollPane = new JScrollPane(poemsTable);
+
+        tablesPanel.add(booksScrollPane);
+        tablesPanel.add(poemsScrollPane);
+
+        add(leftPanel, BorderLayout.WEST);
+        add(tablesPanel, BorderLayout.CENTER);
     }
 
-    private void updateBook() {
-        String title = titleField.getText();
-        String author = authorField.getText();
-        String yearPassed = yearPassedField.getText();
-        String newTitle = JOptionPane.showInputDialog("Enter new title:");
-        businessLayer.updateBook(title, newTitle, author, yearPassed);
-        clearFields();
-        resultArea.setText("Book updated successfully.");
-    }
 
-    private void deleteBook() {
-        String title = titleField.getText();
-        businessLayer.delBook(title);
-        clearFields();
-        resultArea.setText("Book deleted successfully.");
-    }
 
-    private void viewAllBooks() {
-        List<BooksDTO> allBooks = businessLayer.ShowAllBooks();
-        resultArea.setText("");
-        for (BooksDTO book : allBooks) {
-            resultArea.append(book + "\n");
+    private void showPoemsInTable(String bookTitle) {
+        List<String> poems = businessLayer.show_poems(bookTitle);
+
+        DefaultTableModel tableModel = (DefaultTableModel) poemsTable.getModel();
+        tableModel.setRowCount(0);
+
+        for (String poem : poems) {
+            tableModel.addRow(new Object[]{poem});
         }
     }
 
-    private void clearFields() {
-        titleField.setText("");
-        authorField.setText("");
-        yearPassedField.setText("");
+    
+    private void addBook() {
+        String title = addTitleField.getText();
+        String author = addAuthorField.getText();
+        String yearPassedText = addYearField.getText();
+        try {
+            int yearPassed = Integer.parseInt(yearPassedText);
+
+            if (isValidInput(title, author, yearPassedText)) {
+                businessLayer.addData(title, author, String.valueOf(yearPassed));
+                clearAddFields();
+                populateTable();
+            } else {
+                JOptionPane.showMessageDialog(this, "Please enter valid data in all fields.", "Invalid Input", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid integer for the year.", "Invalid Year", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+
+    private boolean isValidInput(String title, String author, String yearPassed) {
+        return !title.trim().isEmpty() && !author.trim().isEmpty() && !yearPassed.trim().isEmpty();
+    }
+
+    private void searchBook() {
+        String searchTerm = searchField.getText().toLowerCase();
+
+        tableModel.setRowCount(0);
+        List<BooksDTO> booksList = businessLayer.ShowAllBooks();
+        for (BooksDTO book : booksList) {
+            if (book.getTitle().toLowerCase().contains(searchTerm)
+                    || book.getAuthor().toLowerCase().contains(searchTerm)
+                    || book.getYearPassed().toLowerCase().contains(searchTerm)) {
+                Object[] rowData = {book.getTitle(), book.getAuthor(), book.getYearPassed(), "Update", "Delete"};
+                tableModel.addRow(rowData);
+            }
+        }
+    }
+
+    private void populateTable() {
+        tableModel.setRowCount(0);
+
+        List<BooksDTO> booksList = businessLayer.ShowAllBooks();
+        for (BooksDTO book : booksList) {
+            Object[] rowData = {book.getTitle(), book.getAuthor(), book.getYearPassed(), "Update", "Delete"};
+            tableModel.addRow(rowData);
+        }
+    }
+
+    private void clearAddFields() {
+        addTitleField.setText("");
+        addAuthorField.setText("");
+        addYearField.setText("");
+    }
+
+
+    // ButtonRenderer and ButtonEditor classes for handling button actions in JTable
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                                                       boolean hasFocus, int row, int column) {
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
+
+    class ButtonEditor extends DefaultCellEditor {
+        protected JButton button;
+
+        private String label;
+
+        private boolean isPushed;
+
+        public ButtonEditor(JTextField textField) {
+            super(textField);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                }
+            });
+        }
+
+        //Both functions to design JTable Columns.
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                                                     boolean isSelected, int row, int column) {
+            if (isSelected) {
+                button.setForeground(table.getSelectionForeground());
+                button.setBackground(table.getSelectionBackground());
+            } else {
+                button.setForeground(table.getForeground());
+                button.setBackground(UIManager.getColor("Button.background"));
+            }
+            label = (value == null) ? "" : value.toString();
+            button.setText(label);
+            isPushed = true;
+            return button;
+        }
+
+        public Object getCellEditorValue() {
+            if (isPushed) {
+                SwingUtilities.invokeLater(() -> {
+                    int selectedRow = booksTable.getSelectedRow();
+                    if (selectedRow >= 0 && selectedRow < tableModel.getRowCount()) {
+                        String title = tableModel.getValueAt(selectedRow, 0).toString();
+                        if (label.equals("Update")) {
+                            updateBook(title);
+                        } else if (label.equals("Delete")) {
+                            deleteBook(title);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(PresentationLayer.this, "Please select a row for update or delete.", "No Row Selected", JOptionPane.WARNING_MESSAGE);
+                    }
+                    isPushed = false;
+                });
+            }
+            return label;
+        }
+
+
+        //Update Book
+        private void updateBook(String title) {
+        
+            BooksDTO existingBook = businessLayer.showSingleBook(title);
+            JFrame updateFrame = new JFrame("Update Book");
+            updateFrame.setSize(400, 300);
+            updateFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            updateFrame.setLayout(new GridLayout(5, 2));
+            JTextField titleField = new JTextField(existingBook.getTitle());
+            JTextField authorField = new JTextField(existingBook.getAuthor());
+            JTextField yearPassedField = new JTextField(existingBook.getYearPassed());
+
+            JButton updateButton = new JButton("Update");
+
+            updateButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String updatedTitle = titleField.getText();
+                    String updatedAuthor = authorField.getText();
+                    String updatedYearPassed = yearPassedField.getText();
+                    if (isValidInput(updatedTitle, updatedAuthor, updatedYearPassed)) {
+                        businessLayer.updateBook(title, updatedTitle, updatedAuthor, updatedYearPassed);
+                        populateTable();
+                        updateFrame.dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(updateFrame, "Please enter valid data in all fields.", "Invalid Input", JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+            });
+
+            updateFrame.add(new JLabel("Title:"));
+            updateFrame.add(titleField);
+            updateFrame.add(new JLabel("Author:"));
+            updateFrame.add(authorField);
+            updateFrame.add(new JLabel("Year Passed:"));
+            updateFrame.add(yearPassedField);
+            updateFrame.add(new JLabel(""));
+            updateFrame.add(updateButton);
+
+            updateFrame.setVisible(true);
+        }
+
+
+        //Delete Book
+        private void deleteBook(String title) {
+            int option = JOptionPane.showConfirmDialog(PresentationLayer.this, "Are you sure you want to delete the book '" + title + "'?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+            if (option == JOptionPane.YES_OPTION) {
+                businessLayer.delBook(title);
+                populateTable();
+            }
+        }
     }
     
-    private void viewSingleBook() {
-        String title = titleField.getText().trim();
-        if (!title.isEmpty()) {
-            BooksDTO book = businessLayer.showSingleBook(title);
-            if (book != null) {
-                resultArea.setText("Book Found!\nDetails are:\n" +
-                                   "Title: " + book.getTitle() +
-                                   "\nAuthor: " + book.getAuthor() +
-                                   "\nYear Passed: " + book.getYearPassed());
-            } else {
-                resultArea.setText("Book Not found!");
-            }
-        } else {
-            resultArea.setText("Please enter a title to search.");
-        }
-    }
-
-
+    
     public static void main(String[] args) {
-        DBInterfaceFacade dataAccess = new DataLayerDB();
-        BusinessLayer businessLayer = new BusinessLayer(dataAccess);
-
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new PresentationLayer(businessLayer).setVisible(true);
-            }
-        });
+    	SwingUtilities.invokeLater(() -> {
+    		DBInterfaceFacade dataLayer = new DataLayerDB();
+    		BusinessLayerInterface businessLayer = new BusinessLayer(dataLayer);
+    		PresentationLayer gui = new PresentationLayer(businessLayer);
+    		gui.setVisible(true);
+    	});
     }
 }

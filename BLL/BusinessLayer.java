@@ -6,7 +6,7 @@ import DAL.DBInterfaceFacade;
 
 import DTO.BooksDTO;
 
-public class BusinessLayer {
+public class BusinessLayer implements BusinessLayerInterface{
     private final DBInterfaceFacade DAO;
 //(Moiz)
     public BusinessLayer(DBInterfaceFacade DAO) {
@@ -33,5 +33,12 @@ public class BusinessLayer {
     
     public BooksDTO showSingleBook(String b_title) {
         return DAO.showSingleBook(b_title);
+    }
+    @Override
+    public List<String> show_poems(String bookName) {
+        
+        return DAO.show_poems(bookName);
+
+        
     }
 }
