@@ -33,5 +33,24 @@ public class TokenDAL {
         }
         return allVerses;
     }
+    //SELECT  AND RETURN VERSE ID FOR TOKENIZATION
+    //SELECT ONLY SELECTED VERSES ID  FOR TOKENIZATION
+    public int getVerseId(String verse) {
+        int vId = -1;
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String selectQuery = "SELECT v_id FROM Verses WHERE verse = ?";
+            try (PreparedStatement getVerseIdStatement = connection.prepareStatement(selectQuery)) {
+                getVerseIdStatement.setString(1, verse);
+                try (ResultSet resultSet = getVerseIdStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        vId = resultSet.getInt("v_id");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return vId;
+    }
 
 }
