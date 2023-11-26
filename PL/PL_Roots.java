@@ -1,129 +1,91 @@
 package PL;
+
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import BLL.Roots_BO;
+import BLL.RootsBO;
 import DAL.DataLayerRoots;
+import RootsPLOverall.PL_SingleRoot;
+import RootsPLOverall.PL_ViewAll;
+import RootsPLOverall.PL_addSingleRoot;
+import RootsPLOverall.PL_updateSingleRoot;
 
 public class PL_Roots extends JFrame {
-    private Roots_BO rootsBO;
-    private JTextField rootField;
-    private JTextArea resultArea;
 
-    public PL_Roots(Roots_BO rootsBO) {
-        this.rootsBO = rootsBO;
+    private final RootsBO rootsBO;
 
-        setTitle("Root Management System");
-        setSize(400, 300);
+    public PL_Roots() {
+        super("Root Management System");
+
+        rootsBO = new RootsBO(new DataLayerRoots());
+
+        // Set up the JFrame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(800, 600);
+        setLayout(new BorderLayout());
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(6, 2));
+        // Create buttons for each functionality
+        JButton addSingleRootButton = new JButton("Add Single Root");
+        JButton singleRootSearchButton = new JButton("Single Root Search");
+        JButton updateSingleRootButton = new JButton("Update Single Root");
+        JButton viewAllRootsButton = new JButton("View All Roots");
 
-        JLabel rootLabel = new JLabel("Root:");
-        rootField = new JTextField(20);
-
-        JButton addButton = new JButton("Add Root");
-        JButton updateButton = new JButton("Update Root");
-        JButton deleteButton = new JButton("Delete Root");
-        JButton viewButton = new JButton("View All Roots");
-
-        resultArea = new JTextArea(10, 30);
-        resultArea.setEditable(false);
-
-        panel.add(rootLabel);
-        panel.add(rootField);
-        panel.add(addButton);
-        panel.add(updateButton);
-        panel.add(deleteButton);
-        panel.add(viewButton);
-
-        JScrollPane scrollPane = new JScrollPane(resultArea);
-
-        panel.add(scrollPane);
-
-        add(panel, BorderLayout.CENTER);
-        addButton.addActionListener(new ActionListener() {
+        // Add action listeners to the buttons
+        addSingleRootButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                addRoot();
+                new PL_addSingleRoot();
             }
         });
 
-        updateButton.addActionListener(new ActionListener() {
+        singleRootSearchButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                updateRoot();
+                new PL_SingleRoot(rootsBO).setVisible(true);
             }
         });
 
-        deleteButton.addActionListener(new ActionListener() {
+        updateSingleRootButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                deleteRoot();
+                new PL_updateSingleRoot();
             }
         });
 
-        viewButton.addActionListener(new ActionListener() {
+        viewAllRootsButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                viewAllRoots();
+                new PL_ViewAll(rootsBO).setVisible(true);
             }
         });
-    }
 
-    private void addRoot() {
-        String root = rootField.getText();
-        rootsBO.addRoot(root);
-        clearFields();
-        resultArea.setText("Root added successfully.");
-    }
+        // Create a panel for the buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(addSingleRootButton);
+        buttonPanel.add(singleRootSearchButton);
+        buttonPanel.add(updateSingleRootButton);
+        buttonPanel.add(viewAllRootsButton);
 
-    private void updateRoot() {
-        String root = rootField.getText();
-        String newRoot = JOptionPane.showInputDialog("Enter new root:");
-        rootsBO.updateRoot(root, newRoot);
-        clearFields();
-        resultArea.setText("Root updated successfully.");
-    }
+        // Add the panel to the JFrame
+        add(buttonPanel, BorderLayout.CENTER);
 
-    private void deleteRoot() {
-        String root = rootField.getText();
-        rootsBO.deleteRoot(root);
-        clearFields();
-        resultArea.setText("Root deleted successfully.");
-    }
-
-    private void viewAllRoots() {
-        List<String> allRoots = rootsBO.showAllRoots();
-        resultArea.setText("");
-        for (String root : allRoots) {
-            resultArea.append(root + "\n");
-        }
-    }
-
-    private void clearFields() {
-        rootField.setText("");
+        // Make the JFrame visible
+        setVisible(true);
     }
 
     public static void main(String[] args) {
-        Roots_BO rootsBO = new Roots_BO(new DataLayerRoots());
-
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
-                new PL_Roots(rootsBO).setVisible(true);
+                new PL_Roots();
             }
         });
     }
-    //this is presentation layer of roots
 }
-
