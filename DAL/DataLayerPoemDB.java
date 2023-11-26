@@ -8,29 +8,31 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+
+import DTO.BooksDTO;
 
 public class DataLayerPoemDB implements PoemInterface {
 	private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
 	private static final String DB_USER = "root";
 	private static final String DB_PASSWORD = "";
 
-	@Override
-	public void addData(String btitle, String a, String yp) {
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-			String insertIntoTable = "INSERT INTO books (b_title, author, yp) VALUES (?, ?, ?)";
-			try (PreparedStatement ValforExec = connection.prepareStatement(insertIntoTable)) {
-				ValforExec.setString(1, btitle);
-				ValforExec.setString(2, a);
-				ValforExec.setString(3, yp);
-				ValforExec.executeUpdate();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	DataLayerDB BookDAO = new DataLayerDB();
+
+	public DataLayerPoemDB() {
 	}
 
-	private int getPoemIdByTitleAndBook(String title, int bookId) {
+	// Adding Data by original Files.
+	@Override
+	public void addData(String btitle, String a, String yp) {
+		BookDAO.addData(btitle, a, yp);
+	}
+
+	private int getPoemIdByTitleAndBook1(String title, int bookId) {
 		int poemId = -1;
 		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
 			String selectQuery = "SELECT pid FROM Poems WHERE p_title = ? AND b_id = ?";
@@ -74,21 +76,90 @@ public class DataLayerPoemDB implements PoemInterface {
 	}
 
 	@Override
-	public int insertPoem(String title, int bookId) {
-		int poemId = getPoemIdByTitleAndBook(title, bookId);
-		if (poemId == -1) {
-			try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-				String insertQuery = "INSERT INTO Poems (p_title, b_id) VALUES (?, ?)";
-				try (PreparedStatement statement = con.prepareStatement(insertQuery)) {
-					statement.setString(1, title);
-					statement.setInt(2, bookId);
-					statement.executeUpdate();
+	public int bookcheckk() {
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Enter Book Name you want to add poems to:");
+		String bname = sc.nextLine();
+		System.out.println("Enter Author Name:");
+		String aname = sc.nextLine();
+
+		String btitle;
+		String author;
+		String Yearpassed;
+
+		int bookId = CheckBookk(bname, aname);
+
+		if (bookId == -1) {
+			System.out.println("Book Not Available.\nAdd Book First");
+			System.out.println("Enter Book title:");
+			btitle = sc.nextLine();
+			System.out.println("Enter Author:");
+			author = sc.nextLine();
+			System.out.println("Enter Passing date:");
+			Yearpassed = sc.nextLine();
+			addData(btitle, author, Yearpassed);
+			bookId = CheckBookk(btitle, author);
+		}
+		return bookId;
+	}
+
+	@Override
+	public int CheckBookk(String title, String author) {
+		int bookId = -1;
+		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+			String selectQuery = "SELECT b_id FROM Books WHERE b_title = ? AND author = ?";
+			try (PreparedStatement statement = con.prepareStatement(selectQuery)) {
+				statement.setString(1, title);
+				statement.setString(2, author);
+				try (ResultSet resultSet = statement.executeQuery()) {
+					if (resultSet.next()) {
+						bookId = resultSet.getInt("b_id");
+					}
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
-				return -1;
 			}
-			poemId = getPoemIdByTitleAndBook(title, bookId);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		return bookId;
+	}
+
+	// Till here Book add and Check Functions.
+	@Override
+	public int insertPoem(String title, int bookId) {
+		int poemId = getPoemIdByTitleAndBook1(title, bookId);
+		if (poemId == -1) {
+			try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+				String insertPoemQuery = "INSERT INTO Poems (b_id, p_title) VALUES (?, ?)";
+				try (PreparedStatement poemStatement = con.prepareStatement(insertPoemQuery,
+						PreparedStatement.RETURN_GENERATED_KEYS)) {
+					poemStatement.setInt(1, bookId);
+					poemStatement.setString(2, title);
+					poemStatement.executeUpdate();
+
+					ResultSet generatedKeys = poemStatement.getGeneratedKeys();
+					if (generatedKeys.next()) {
+						poemId = generatedKeys.getInt(1);
+					}
+				}
+
+				String insertVerseQuery = "INSERT INTO Verses (verse, p_id) VALUES (?, ?)";
+				try (PreparedStatement verseStatement = con.prepareStatement(insertVerseQuery)) {
+					String[] verses = title.split("\\.\\.\\.");
+					verseStatement.setString(1, verses[0].trim());
+					verseStatement.setInt(2, poemId);
+					verseStatement.executeUpdate();
+
+					if (verses.length > 1) {
+						verseStatement.setString(1, verses[1].trim());
+						verseStatement.setInt(2, poemId);
+						verseStatement.executeUpdate();
+					}
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 		return poemId;
 	}
@@ -108,41 +179,15 @@ public class DataLayerPoemDB implements PoemInterface {
 	}
 
 	@Override
-	public int bookcheckk() {
-		Scanner sc = new Scanner(System.in);
-		System.out.println("Enter Book Name you want to add poems to:");
-		String bname = sc.nextLine();
-		System.out.println("Enter Author Name:");
-		String aname = sc.nextLine();
-
-		String btitle;
-		String author;
-		String Yearpassed;
-
-		int bookId = CheckBookByNameAndAuthor(bname, aname);
-
-		if (bookId == -1) {
-			System.out.println("Book Not Available.\nAdd Book First");
-			System.out.println("Enter Book title:");
-			btitle = sc.nextLine();
-			System.out.println("Enter Author:");
-			author = sc.nextLine();
-			System.out.println("Enter Passing date:");
-			Yearpassed = sc.nextLine();
-			addData(btitle, author, Yearpassed);
-			bookId = CheckBookByNameAndAuthor(btitle, author);
-		}
-		return bookId;
-	}
-
-	@Override
-	public void ParsePoems(String fileName) {
+	public List<String> ParsePoems(String fileName) {
 		int x = 0;
 		String poemTitle = "";
 		String tempVerse1 = "";
 		String tempVerse2 = "";
 
 		int book_id = bookcheckk();
+		// has all verses.
+		List<String> parsedVerses = new ArrayList<>();
 
 		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
 			try (BufferedReader obj = new BufferedReader(new FileReader(fileName))) {
@@ -167,28 +212,266 @@ public class DataLayerPoemDB implements PoemInterface {
 								String[] vp = verse.split("\\.\\.\\.");
 								tempVerse1 = vp[0].trim();
 
-								if (vp.length > 1) {
-									tempVerse2 = vp[1];
-								} else {
-									tempVerse2 = "N/A";
-								}
-
 								int poemId = insertPoem(poemTitle, book_id);
 								if (poemId != -1) {
 									insertVerse(tempVerse1, poemId);
-									if (!tempVerse2.equals("N/A")) {
+									parsedVerses.add(tempVerse1);
+
+									if (vp.length > 1) {
+										tempVerse2 = vp[1].trim();
 										insertVerse(tempVerse2, poemId);
+										parsedVerses.add(tempVerse2);
 									}
 								}
 							}
 						}
 					}
 				}
+				tokenize();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
+		return parsedVerses;
 	}
+
+	// see if needed or not.
+	@Override
+	public List<BooksDTO> showAllBooks() {
+		List<BooksDTO> allBooksData = new ArrayList<>();
+		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+			String selectQuery = "SELECT b_title, author, yp FROM books";
+			try (PreparedStatement GetBooks = connection.prepareStatement(selectQuery)) {
+				try (ResultSet resultSet = GetBooks.executeQuery()) {
+					while (resultSet.next()) {
+						String title = resultSet.getString("b_title");
+						String author = resultSet.getString("author");
+						String yearPassed = resultSet.getString("yp");
+						BooksDTO book = new BooksDTO(title, author, yearPassed);
+						allBooksData.add(book);
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return allBooksData;
+	}
+
+	// tokenize
+	public void tokenize() {
+
+		Map<Integer, String> allVersesWithIds = getAllVersesWithIds();
+		DataLayerRoots rootsDAO = new DataLayerRoots();
+		Map<Integer, String> newmap = new HashMap<>();
+
+		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+
+			for (Map.Entry<Integer, String> entry : allVersesWithIds.entrySet()) {
+
+				Integer verseId = entry.getKey();
+				String verseText = entry.getValue();
+
+				String[] words = verseText.split("\\s+");
+
+				for (String x : words) {
+					insertToken(x, verseId, con);
+				}
+
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		newmap = getAllTokensWithIds();
+
+		rootsDAO.createRoots(newmap);
+
+	}
+
+	public void insertToken(String token, int v_id, Connection con) throws SQLException {
+
+		String insertTokenQuery = "INSERT INTO Tokens (token, v_id) VALUES (?, ?)";
+		try (PreparedStatement tokenStatement = con.prepareStatement(insertTokenQuery)) {
+			tokenStatement.setString(1, token);
+			tokenStatement.setInt(2, v_id);
+			tokenStatement.executeUpdate();
+		}
+	}
+
+	public Map<Integer, String> getAllTokensWithIds() {
+		Map<Integer, String> allTokens = new HashMap<>();
+		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+			String selectQuery = "SELECT t_id, token FROM Tokens";
+			try (PreparedStatement getVerses = connection.prepareStatement(selectQuery)) {
+				try (ResultSet resultSet = getVerses.executeQuery()) {
+					while (resultSet.next()) {
+						int tokenId = resultSet.getInt("t_id");
+						String token = resultSet.getString("token");
+						allTokens.put(tokenId, token);
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return allTokens;
+	}
+
+	public Map<Integer, String> getAllVersesWithIds() {
+		Map<Integer, String> allVerses = new HashMap<>();
+		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+			String selectQuery = "SELECT v_id, verse FROM Verses";
+			try (PreparedStatement getVerses = connection.prepareStatement(selectQuery)) {
+				try (ResultSet resultSet = getVerses.executeQuery()) {
+					while (resultSet.next()) {
+						int verseId = resultSet.getInt("v_id");
+						String verse = resultSet.getString("verse");
+						allVerses.put(verseId, verse);
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return allVerses;
+	}
+
+	@Override
+	public List<String> getAllVerses() {
+		List<String> allVerses = new ArrayList<>();
+		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+			String selectQuery = "SELECT verse FROM Verses";
+			try (PreparedStatement getVerses = connection.prepareStatement(selectQuery)) {
+				try (ResultSet resultSet = getVerses.executeQuery()) {
+					while (resultSet.next()) {
+						String verse = resultSet.getString("verse");
+						allVerses.add(verse);
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return allVerses;
+	}
+
+	@Override
+	public void updateBook(String btitle, String ubtitle, String a, String yp) {
+		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+			String updateQuery = "UPDATE books SET b_title = ?, author = ?, yp = ? WHERE b_title = ?";
+			try (PreparedStatement Updatevals = connection.prepareStatement(updateQuery)) {
+				Updatevals.setString(1, ubtitle);
+				Updatevals.setString(2, a);
+				Updatevals.setString(3, yp);
+				Updatevals.setString(4, btitle);
+				Updatevals.executeUpdate();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void updatePoem(String oldTitle, String newTitle, String newAuthor, String newYearPassed) {
+		int bookId = CheckBookByNameAndAuthor(oldTitle, newAuthor);
+		int oldBookId = CheckBookByNameAndAuthor(oldTitle, "");
+		if (bookId == -1) {
+			if (oldBookId != -1) {
+				updateBook(oldTitle, newTitle, newAuthor, newYearPassed);
+			}
+		} else {
+			System.out.println("Book with new details already exists.");
+		}
+	}
+
+	@Override
+	public void deletePoem(String title) {
+		int bookId = CheckBookByNameAndAuthor(title, "");
+		if (bookId != -1) {
+			try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+				String deletePoemQuery = "DELETE FROM Poems WHERE b_id = ?";
+				try (PreparedStatement deletePoemStatement = con.prepareStatement(deletePoemQuery)) {
+					deletePoemStatement.setInt(1, bookId);
+					deletePoemStatement.executeUpdate();
+				}
+
+				String deleteBookQuery = "DELETE FROM Books WHERE b_id = ?";
+				try (PreparedStatement deleteBookStatement = con.prepareStatement(deleteBookQuery)) {
+					deleteBookStatement.setInt(1, bookId);
+					deleteBookStatement.executeUpdate();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("Book not found for deletion.");
+		}
+	}
+
+	@Override
+	public List<String> viewAllPoems() {
+		List<String> poems = new ArrayList<>();
+		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+			String selectAllPoemsQuery = "SELECT p_title FROM Poems";
+			try (PreparedStatement statement = con.prepareStatement(selectAllPoemsQuery);
+					ResultSet resultSet = statement.executeQuery()) {
+				while (resultSet.next()) {
+					poems.add(resultSet.getString("p_title"));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return poems;
+	}
+
+	@Override
+	   public List<String> viewSinglePoem(String title) {
+	       List<String> verses = new ArrayList<>();
+	       try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+	           int bookId = CheckBookByNameAndAuthor(title, "");
+	           if (bookId != -1) {
+	               String selectSinglePoemQuery = "SELECT verse FROM Verses v INNER JOIN Poems p ON v.p_id = p.pid WHERE p_title = ?";
+	               try (PreparedStatement statement = con.prepareStatement(selectSinglePoemQuery)) {
+	                   statement.setString(1, title);
+	                   try (ResultSet resultSet = statement.executeQuery()) {
+	                       while (resultSet.next()) {
+	                           verses.add(resultSet.getString("verse"));
+	                       }
+	                   }
+	               }
+	           } else {
+	               System.out.println("Poem not found.");
+	           }
+	       } catch (SQLException e) {
+	           e.printStackTrace();
+	       }
+	       return verses;
+	}
+	@Override
+	public List<String> insertPoems(List<String> poems, String bookTitle, String author, String yearPassed) {
+	    List<String> verseList = new ArrayList<>();
+	    int bookId = CheckBookByNameAndAuthor(bookTitle, author);
+
+	    if (bookId == -1) {
+	        addData(bookTitle, author, yearPassed);
+	        bookId = CheckBookByNameAndAuthor(bookTitle, author);
+	    }
+
+	    for (String poem : poems) {
+	        int poemId = insertPoem(poem, bookId);
+	        if (poemId != -1) {
+	            insertVerse(poem, poemId);
+	            verseList.add(poem); // Add the string directly
+	        }
+	    }
+	    return verseList;
+	}
+
+
 }

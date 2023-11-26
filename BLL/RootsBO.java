@@ -1,18 +1,19 @@
 package BLL;
 
 import java.util.List;
+import java.util.Map;
 
 import DAL.Roots_Interface;
 
-public class Roots_BO {
+public class RootsBO {
 	Roots_Interface DAO;
 	
-	public Roots_BO(Roots_Interface DAO)
+	public RootsBO(Roots_Interface DAO)
 	{
 		this.DAO=DAO;
 	}
 	public void addRoot(String root) {
-        DAO.addRoot(root);
+        DAO.addRoot(root, 0);
     }
 
     public boolean checkRoot(String rName) {
@@ -27,9 +28,16 @@ public class Roots_BO {
         DAO.deleteRoot(root);
     }
 
-    public List<String> showAllRoots() {
+    public Map<Integer,String> showAllRoots() {
         return DAO.showAllRoots();
     }
-    //This is business layer for Roots 
-    //
+    
+    
+    
+    public List<String> showRootDataa(String Root)
+    {
+    	return DAO.showRootData(Root);
+    }
+    //rootbo
+    
 }
