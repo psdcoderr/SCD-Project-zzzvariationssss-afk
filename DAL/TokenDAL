@@ -52,5 +52,23 @@ public class TokenDAL {
         }
         return vId;
     }
-
+    //Add Token on Selected verses manually 
+    //Show on database  along verses id
+     public void addNewToken(String verse, String token) {
+        int vId = getVerseId(verse);
+        if (vId != -1) {
+            try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+                String query = "INSERT INTO Tokens (token, v_id) VALUES (?, ?)";
+                try (PreparedStatement statement = con.prepareStatement(query)) {
+                    statement.setString(1, token);
+                    statement.setInt(2, vId);
+                    statement.executeUpdate();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
+
+
