@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Toolkit;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -46,29 +45,29 @@ public class MainGUI extends JFrame {
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(welcomeLabel, BorderLayout.NORTH);
         mainPanel.setBackground(new Color(0, 0, 0, 0));
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 4));
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 4)); // Changed to a single row layout
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH); // Moved to the bottom
 
         JButton booksButton = createStyledButton("BOOKS", Color.cyan, 14);
         JButton rootsButton = createStyledButton("ROOTS", Color.cyan, 14);
         JButton poemsButton = createStyledButton("ADD POEMS", Color.cyan, 12);
         JButton importButton = createStyledButton("IMPORT POEMS DATA", Color.cyan, 12);
         JButton tokensButton = createStyledButton("ADD TOKENS", Color.cyan, 12);
-        JButton maximizeButton = createStyledButton("MAXIMIZE", Color.white, 12); 
+        JButton editToken = createStyledButton("EDIT TOKENS", Color.cyan, 12); 
         
         buttonPanel.add(booksButton);
         buttonPanel.add(rootsButton);
         buttonPanel.add(poemsButton);
         buttonPanel.add(importButton);
         buttonPanel.add(tokensButton);
-        buttonPanel.add(maximizeButton);
+        buttonPanel.add(editToken);
 
         booksButton.addActionListener(e -> openBooksPanel());
         rootsButton.addActionListener(e -> openRootsPanel());
         poemsButton.addActionListener(e -> openPoemsPanel());
         importButton.addActionListener(e -> openDataImportPanel());
         tokensButton.addActionListener(e -> openTokenPanel());
-        maximizeButton.addActionListener(e -> maximizeScreen()); 
+        editToken.addActionListener(e -> openEditTokenPanel()); 
     
     }
 
@@ -96,7 +95,7 @@ public class MainGUI extends JFrame {
     private void openPoemsPanel() {
         PoemInterface DAO = new DataLayerPoemDB();
         PoemBO poemBO = new PoemBO(DAO);
-        PL_Poems poemsPanel = new PL_Poems(poemBO);
+        PoemGUI poemsPanel = new PoemGUI();
         poemsPanel.setVisible(true);
     }
     
@@ -109,10 +108,8 @@ public class MainGUI extends JFrame {
         ManuallyAddVerse dataImportPanel = new ManuallyAddVerse(importBO);
         dataImportPanel.setVisible(true);
     }
-    private void maximizeScreen() {
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setUndecorated(true);
-        Toolkit.getDefaultToolkit().setDynamicLayout(true);
+    private void openEditTokenPanel() {
+        TokenPLOverall.EditTokenApp.main(new String[0]);
     }
 
     
