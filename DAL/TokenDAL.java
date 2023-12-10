@@ -1,5 +1,3 @@
-
-
 package DAL;
 
 import java.sql.Connection;
@@ -9,16 +7,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-//CONNECTION WITH DB
+
+import DB.DbConnection;
+
 public class TokenDAL {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "";
-//METHOD GETTIG ALL VERSES
-//SELECT FROM THESE VERSES  FOR TOKENIZATION
+
     public List<String> getAllVerses() {
         List<String> allVerses = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DbConnection.getConnection()) {
             String selectQuery = "SELECT verse FROM Verses";
             try (PreparedStatement getVerses = connection.prepareStatement(selectQuery)) {
                 try (ResultSet resultSet = getVerses.executeQuery()) {
@@ -33,11 +29,10 @@ public class TokenDAL {
         }
         return allVerses;
     }
-    //SELECT  AND RETURN VERSE ID FOR TOKENIZATION
-    //SELECT ONLY SELECTED VERSES ID  FOR TOKENIZATION
+
     public int getVerseId(String verse) {
         int vId = -1;
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DbConnection.getConnection()) {
             String selectQuery = "SELECT v_id FROM Verses WHERE verse = ?";
             try (PreparedStatement getVerseIdStatement = connection.prepareStatement(selectQuery)) {
                 getVerseIdStatement.setString(1, verse);
@@ -52,12 +47,11 @@ public class TokenDAL {
         }
         return vId;
     }
-    //Add Token on Selected verses manually 
-    //Show on database  along verses id
-     public void addNewToken(String verse, String token) {
+
+    public void addNewToken(String verse, String token) {
         int vId = getVerseId(verse);
         if (vId != -1) {
-            try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        	try (Connection con = DbConnection.getConnection()){
                 String query = "INSERT INTO Tokens (token, v_id) VALUES (?, ?)";
                 try (PreparedStatement statement = con.prepareStatement(query)) {
                     statement.setString(1, token);
@@ -70,5 +64,3 @@ public class TokenDAL {
         }
     }
 }
-
-

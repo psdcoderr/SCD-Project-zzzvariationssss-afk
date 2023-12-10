@@ -8,11 +8,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import DB.DbConnection;
+
 public class addSingleRootDAL {
-    // Your database connection details
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "";
 
     public List<String> getSelectedSuggestedRoots(int[] selectedRows) {
         List<String> allSuggestedRoots = getSuggestedRootsForVerses(getAllVerses());
@@ -60,7 +58,7 @@ public class addSingleRootDAL {
 
     public List<String> getAllVerses() {
         List<String> allVerses = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DbConnection.getConnection()) {
             String selectQuery = "SELECT verse FROM Verses";
             try (PreparedStatement getVerses = connection.prepareStatement(selectQuery)) {
                 try (ResultSet resultSet = getVerses.executeQuery()) {
@@ -78,7 +76,7 @@ public class addSingleRootDAL {
 
     public List<String> getTokensForVerses(List<String> verses) {
         List<String> tokens = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DbConnection.getConnection()){
             String selectQuery = "SELECT token FROM Tokens WHERE v_id IN (SELECT v_id FROM Verses WHERE verse = ?)";
             try (PreparedStatement getTokens = connection.prepareStatement(selectQuery)) {
                 for (String verse : verses) {
@@ -99,7 +97,7 @@ public class addSingleRootDAL {
 
     public List<String> getAllTokens() {
         List<String> allTokens = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DbConnection.getConnection()) {
             String selectQuery = "SELECT token FROM Tokens";
             try (PreparedStatement getTokens = connection.prepareStatement(selectQuery)) {
                 try (ResultSet resultSet = getTokens.executeQuery()) {
@@ -142,7 +140,7 @@ public class addSingleRootDAL {
     }
 
     public void addRootsToTokens(List<String> tokens, String root) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+    	try (Connection connection = DbConnection.getConnection()){
             String insertQuery = "INSERT INTO Roots (t_id, root) VALUES (?, ?)";
             try (PreparedStatement addRootStatement = connection.prepareStatement(insertQuery)) {
                 for (String token : tokens) {

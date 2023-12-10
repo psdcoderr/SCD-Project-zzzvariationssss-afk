@@ -19,18 +19,13 @@ public class PL_ViewAll extends JFrame {
         super("View All Roots");
         this.rootsBO = rootsBO;
 
-        // Set up the JFrame
        // setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 300);
         setLayout(new BorderLayout());
 
-        // Create components
         rootsTable = new JTable();
-
-        // Add components to the JFrame
         add(new JScrollPane(rootsTable), BorderLayout.CENTER);
 
-        // Load and display roots data
         loadRootsData();
     }
 
@@ -54,7 +49,6 @@ public class PL_ViewAll extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                // Create an instance of Roots_BO and pass it to PL_ViewAll
                 RootsBO rootsBO = new RootsBO(new DAL.DataLayerRoots());
                 new PL_ViewAll(rootsBO).setVisible(true);
             }

@@ -22,165 +22,138 @@ import javax.swing.table.DefaultTableModel;
 import BLL.addSingleRootBLL;
 
 public class PL_addSingleRoot extends JFrame {
-    private addSingleRootBLL rootBLL;
+	private addSingleRootBLL rootBLL;
 
-    private DefaultTableModel versesTableModel;
-    private JTable versesTable;
+	private DefaultTableModel versesTableModel;
+	private JTable versesTable;
 
-    private DefaultTableModel tokensTableModel;
-    private JTable tokensTable;
+	private DefaultTableModel tokensTableModel;
+	private JTable tokensTable;
 
-    private DefaultTableModel suggestedRootsTableModel;
-    private JTable suggestedRootsTable;
+	private DefaultTableModel suggestedRootsTableModel;
+	private JTable suggestedRootsTable;
 
-    private JTextField rootsTextField;
+	private JTextField rootsTextField;
 
-    public PL_addSingleRoot() {
-        rootBLL = new addSingleRootBLL();
+	public PL_addSingleRoot() {
+		rootBLL = new addSingleRootBLL();
 
-        initializeUI();
-        loadDataToVersesTable();
+		initializeUI();
+		loadDataToVersesTable();
 
-      //  setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
-        setLocationRelativeTo(null);
-        setTitle("Root Management System");
-        setVisible(true);
-    }
+		// setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setSize(800, 600);
+		setLocationRelativeTo(null);
+		setTitle("Root Management System");
+		setVisible(true);
+	}
 
-    private void initializeUI() {
-        setLayout(new BorderLayout());
+	private void initializeUI() {
+		setLayout(new BorderLayout());
 
-        // Verses Table
-        versesTableModel = new DefaultTableModel(new String[]{"Verse"}, 0);
-        versesTable = new JTable(versesTableModel);
-        JScrollPane versesScrollPane = new JScrollPane(versesTable);
+		versesTableModel = new DefaultTableModel(new String[] { "Verse" }, 0);
+		versesTable = new JTable(versesTableModel);
+		JScrollPane versesScrollPane = new JScrollPane(versesTable);
+		tokensTableModel = new DefaultTableModel(new String[] { "Token" }, 0);
+		tokensTable = new JTable(tokensTableModel);
+		JScrollPane tokensScrollPane = new JScrollPane(tokensTable);
+		suggestedRootsTableModel = new DefaultTableModel(new String[] { "Suggested Root" }, 0);
+		suggestedRootsTable = new JTable(suggestedRootsTableModel);
+		JScrollPane suggestedRootsScrollPane = new JScrollPane(suggestedRootsTable);
+		JButton fetchTokensButton = new JButton("Fetch Tokens");
+		fetchTokensButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				fetchTokens();
+			}
+		});
 
-        // Tokens Table
-        tokensTableModel = new DefaultTableModel(new String[]{"Token"}, 0);
-        tokensTable = new JTable(tokensTableModel);
-        JScrollPane tokensScrollPane = new JScrollPane(tokensTable);
+		JButton addRootButton = new JButton("Add Root");
+		addRootButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				addRoot();
+			}
+		});
 
-        // Suggested Roots Table
-        suggestedRootsTableModel = new DefaultTableModel(new String[]{"Suggested Root"}, 0);
-        suggestedRootsTable = new JTable(suggestedRootsTableModel);
-        JScrollPane suggestedRootsScrollPane = new JScrollPane(suggestedRootsTable);
+		JButton suggestedRootsButton = new JButton("Suggested Roots");
+		suggestedRootsButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				showSuggestedRoots();
+			}
+		});
+		rootsTextField = new JTextField();
+		rootsTextField.setPreferredSize(new Dimension(150, 30));
 
-        // Fetch Tokens Button
-        JButton fetchTokensButton = new JButton("Fetch Tokens");
-        fetchTokensButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fetchTokens();
-            }
-        });
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.add(fetchTokensButton);
+		buttonPanel.add(addRootButton);
+		buttonPanel.add(suggestedRootsButton);
+		buttonPanel.add(new JLabel("Enter Roots:"));
+		buttonPanel.add(rootsTextField);
 
-        // Add Root Button
-        JButton addRootButton = new JButton("Add Root");
-        addRootButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addRoot();
-            }
-        });
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tokensScrollPane, suggestedRootsScrollPane);
+		splitPane.setResizeWeight(0.5);
 
-        // Suggested Roots Button
-        JButton suggestedRootsButton = new JButton("Suggested Roots");
-        suggestedRootsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showSuggestedRoots();
-            }
-        });
+		JPanel tablePanel = new JPanel(new BorderLayout());
+		tablePanel.add(versesScrollPane, BorderLayout.NORTH);
+		tablePanel.add(splitPane, BorderLayout.CENTER);
 
-        // Roots Text Field
-        rootsTextField = new JTextField();
-        rootsTextField.setPreferredSize(new Dimension(150, 30));
+		add(tablePanel, BorderLayout.CENTER);
+		add(buttonPanel, BorderLayout.SOUTH);
+	}
 
-        // Panel for buttons
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(fetchTokensButton);
-        buttonPanel.add(addRootButton);
-        buttonPanel.add(suggestedRootsButton);
-        buttonPanel.add(new JLabel("Enter Roots:"));
-        buttonPanel.add(rootsTextField);
+	private void loadDataToVersesTable() {
+		List<String> allVerses = rootBLL.getAllVerses();
+		for (String verse : allVerses) {
+			versesTableModel.addRow(new Object[] { verse });
+		}
+	}
 
-        // Split pane for Tokens and Suggested Roots
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tokensScrollPane, suggestedRootsScrollPane);
-        splitPane.setResizeWeight(0.5);
+	private void fetchTokens() {
+		int[] selectedRows = versesTable.getSelectedRows();
+		List<String> selectedVerses = rootBLL.getSelectedVerses(selectedRows);
 
-        // Panel for Tables and Split Pane
-        JPanel tablePanel = new JPanel(new BorderLayout());
-        tablePanel.add(versesScrollPane, BorderLayout.NORTH);
-        tablePanel.add(splitPane, BorderLayout.CENTER);
+		List<String> tokens = rootBLL.getTokensForVerses(selectedVerses);
 
-        // Adding components to the main frame
-        add(tablePanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
-    }
+		tokensTableModel.setRowCount(0);
 
-    private void loadDataToVersesTable() {
-        List<String> allVerses = rootBLL.getAllVerses();
-        for (String verse : allVerses) {
-            versesTableModel.addRow(new Object[]{verse});
-        }
-    }
+		for (String token : tokens) {
+			tokensTableModel.addRow(new Object[] { token });
+		}
+	}
 
-    private void fetchTokens() {
-        // Get selected verse(s)
-        int[] selectedRows = versesTable.getSelectedRows();
-        List<String> selectedVerses = rootBLL.getSelectedVerses(selectedRows);
+	private void showSuggestedRoots() {
+		int[] selectedRows = tokensTable.getSelectedRows();
+		List<String> selectedTokens = rootBLL.getSelectedTokens(selectedRows);
 
-        // Get tokens for selected verses
-        List<String> tokens = rootBLL.getTokensForVerses(selectedVerses);
+		suggestedRootsTableModel.setRowCount(0);
 
-        // Clear existing data
-        tokensTableModel.setRowCount(0);
+		for (String token : selectedTokens) {
+			List<String> suggestedRoots = rootBLL.getSuggestedRoots(token);
+			suggestedRootsTableModel.addRow(suggestedRoots.toArray());
+		}
+	}
 
-        // Populate tokens table
-        for (String token : tokens) {
-            tokensTableModel.addRow(new Object[]{token});
-        }
-    }
+	private void addRoot() {
+		int[] selectedRows = tokensTable.getSelectedRows();
+		List<String> selectedTokens = rootBLL.getSelectedTokens(selectedRows);
 
-    private void showSuggestedRoots() {
-        // Get selected token(s)
-        int[] selectedRows = tokensTable.getSelectedRows();
-        List<String> selectedTokens = rootBLL.getSelectedTokens(selectedRows);
+		String roots = rootsTextField.getText();
 
-        // Clear existing data
-        suggestedRootsTableModel.setRowCount(0);
+		for (String token : selectedTokens) {
+			rootBLL.addRootsToTokens(Arrays.asList(token), roots);
+		}
+		JOptionPane.showMessageDialog(this, "Roots added successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+	}
 
-        // Populate suggested roots table
-        for (String token : selectedTokens) {
-            List<String> suggestedRoots = rootBLL.getSuggestedRoots(token);
-            suggestedRootsTableModel.addRow(suggestedRoots.toArray());
-        }
-    }
-
-    private void addRoot() {
-        // Get selected token(s)
-        int[] selectedRows = tokensTable.getSelectedRows();
-        List<String> selectedTokens = rootBLL.getSelectedTokens(selectedRows);
-
-        // Get roots from the text field
-        String roots = rootsTextField.getText();
-
-        // Add roots to tokens
-        for (String token : selectedTokens) {
-        	rootBLL.addRootsToTokens(Arrays.asList(token), roots);
-        }
-
-        // Show success message (you may want to enhance this)
-        JOptionPane.showMessageDialog(this, "Roots added successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new PL_addSingleRoot();
-            }
-        });
-    }
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				new PL_addSingleRoot();
+			}
+		});
+	}
 }

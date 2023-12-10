@@ -1,7 +1,3 @@
-
-//Tokenization Presentation Layer
-//Select Verses
-//Add Token manually in the specific place 
 package TokenPLOverall;
 
 import javax.swing.*;
@@ -18,7 +14,6 @@ public class AddToken {
         List<String> allVerses = tokenBLL.getAllVerses();
 
         JFrame frame = new JFrame("Verse Display");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 300);
 
         DefaultTableModel model = new DefaultTableModel();

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import DB.DbConnection;
 import DTO.BooksDTO;
 
 public class DataLayerPoemDB implements PoemInterface {
@@ -34,7 +35,7 @@ public class DataLayerPoemDB implements PoemInterface {
 
 	private int getPoemIdByTitleAndBook1(String title, int bookId) {
 		int poemId = -1;
-		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection con = DbConnection.getConnection()) {
 			String selectQuery = "SELECT pid FROM Poems WHERE p_title = ? AND b_id = ?";
 			try (PreparedStatement statement = con.prepareStatement(selectQuery)) {
 				statement.setString(1, title);
@@ -56,7 +57,7 @@ public class DataLayerPoemDB implements PoemInterface {
 	@Override
 	public int CheckBookByNameAndAuthor(String title, String author) {
 		int bookId = -1;
-		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection con = DbConnection.getConnection())  {
 			String selectQuery = "SELECT b_id FROM Books WHERE b_title = ? AND author = ?";
 			try (PreparedStatement statement = con.prepareStatement(selectQuery)) {
 				statement.setString(1, title);
@@ -106,7 +107,7 @@ public class DataLayerPoemDB implements PoemInterface {
 	@Override
 	public int CheckBookk(String title, String author) {
 		int bookId = -1;
-		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection con = DbConnection.getConnection()) {
 			String selectQuery = "SELECT b_id FROM Books WHERE b_title = ? AND author = ?";
 			try (PreparedStatement statement = con.prepareStatement(selectQuery)) {
 				statement.setString(1, title);
@@ -130,7 +131,7 @@ public class DataLayerPoemDB implements PoemInterface {
 	public int insertPoem(String title, int bookId) {
 		int poemId = getPoemIdByTitleAndBook1(title, bookId);
 		if (poemId == -1) {
-			try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+			try (Connection con = DbConnection.getConnection())  {
 				String insertPoemQuery = "INSERT INTO Poems (b_id, p_title) VALUES (?, ?)";
 				try (PreparedStatement poemStatement = con.prepareStatement(insertPoemQuery,
 						PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -166,7 +167,7 @@ public class DataLayerPoemDB implements PoemInterface {
 
 	@Override
 	public void insertVerse(String text, int poemId) {
-		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection con = DbConnection.getConnection()) {
 			String insertQuery = "INSERT INTO Verses (verse, p_id) VALUES (?, ?)";
 			try (PreparedStatement statement = con.prepareStatement(insertQuery)) {
 				statement.setString(1, text);
@@ -189,7 +190,7 @@ public class DataLayerPoemDB implements PoemInterface {
 		// has all verses.
 		List<String> parsedVerses = new ArrayList<>();
 
-		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection con = DbConnection.getConnection())  {
 			try (BufferedReader obj = new BufferedReader(new FileReader(fileName))) {
 				String newline;
 
@@ -242,7 +243,7 @@ public class DataLayerPoemDB implements PoemInterface {
 	@Override
 	public List<BooksDTO> showAllBooks() {
 		List<BooksDTO> allBooksData = new ArrayList<>();
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection connection = DbConnection.getConnection()) {
 			String selectQuery = "SELECT b_title, author, yp FROM books";
 			try (PreparedStatement GetBooks = connection.prepareStatement(selectQuery)) {
 				try (ResultSet resultSet = GetBooks.executeQuery()) {
@@ -268,7 +269,7 @@ public class DataLayerPoemDB implements PoemInterface {
 		DataLayerRoots rootsDAO = new DataLayerRoots();
 		Map<Integer, String> newmap = new HashMap<>();
 
-		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection con = DbConnection.getConnection()) {
 
 			for (Map.Entry<Integer, String> entry : allVersesWithIds.entrySet()) {
 
@@ -305,7 +306,7 @@ public class DataLayerPoemDB implements PoemInterface {
 
 	public Map<Integer, String> getAllTokensWithIds() {
 		Map<Integer, String> allTokens = new HashMap<>();
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection connection = DbConnection.getConnection()) {
 			String selectQuery = "SELECT t_id, token FROM Tokens";
 			try (PreparedStatement getVerses = connection.prepareStatement(selectQuery)) {
 				try (ResultSet resultSet = getVerses.executeQuery()) {
@@ -324,7 +325,7 @@ public class DataLayerPoemDB implements PoemInterface {
 
 	public Map<Integer, String> getAllVersesWithIds() {
 		Map<Integer, String> allVerses = new HashMap<>();
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection connection = DbConnection.getConnection())  {
 			String selectQuery = "SELECT v_id, verse FROM Verses";
 			try (PreparedStatement getVerses = connection.prepareStatement(selectQuery)) {
 				try (ResultSet resultSet = getVerses.executeQuery()) {
@@ -344,7 +345,7 @@ public class DataLayerPoemDB implements PoemInterface {
 	@Override
 	public List<String> getAllVerses() {
 		List<String> allVerses = new ArrayList<>();
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection connection = DbConnection.getConnection()){
 			String selectQuery = "SELECT verse FROM Verses";
 			try (PreparedStatement getVerses = connection.prepareStatement(selectQuery)) {
 				try (ResultSet resultSet = getVerses.executeQuery()) {
@@ -362,7 +363,7 @@ public class DataLayerPoemDB implements PoemInterface {
 
 	@Override
 	public void updateBook(String btitle, String ubtitle, String a, String yp) {
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection connection = DbConnection.getConnection()){
 			String updateQuery = "UPDATE books SET b_title = ?, author = ?, yp = ? WHERE b_title = ?";
 			try (PreparedStatement Updatevals = connection.prepareStatement(updateQuery)) {
 				Updatevals.setString(1, ubtitle);
@@ -393,7 +394,7 @@ public class DataLayerPoemDB implements PoemInterface {
 	public void deletePoem(String title) {
 		int bookId = CheckBookByNameAndAuthor(title, "");
 		if (bookId != -1) {
-			try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+			try (Connection con = DbConnection.getConnection()){
 				String deletePoemQuery = "DELETE FROM Poems WHERE b_id = ?";
 				try (PreparedStatement deletePoemStatement = con.prepareStatement(deletePoemQuery)) {
 					deletePoemStatement.setInt(1, bookId);
@@ -416,7 +417,7 @@ public class DataLayerPoemDB implements PoemInterface {
 	@Override
 	public List<String> viewAllPoems() {
 		List<String> poems = new ArrayList<>();
-		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection con = DbConnection.getConnection()){
 			String selectAllPoemsQuery = "SELECT p_title FROM Poems";
 			try (PreparedStatement statement = con.prepareStatement(selectAllPoemsQuery);
 					ResultSet resultSet = statement.executeQuery()) {
@@ -433,7 +434,7 @@ public class DataLayerPoemDB implements PoemInterface {
 	@Override
 	   public List<String> viewSinglePoem(String title) {
 	       List<String> verses = new ArrayList<>();
-	       try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+	       try (Connection con = DbConnection.getConnection()) {
 	           int bookId = CheckBookByNameAndAuthor(title, "");
 	           if (bookId != -1) {
 	               String selectSinglePoemQuery = "SELECT verse FROM Verses v INNER JOIN Poems p ON v.p_id = p.pid WHERE p_title = ?";

@@ -19,72 +19,63 @@ import javax.swing.table.DefaultTableModel;
 import BLL.RootsBO;
 
 public class PL_SingleRoot extends JFrame {
-    private final JTextField rootTextField;
-    private final JButton searchButton;
-    private final JTable versesTable;
+	private final JTextField rootTextField;
+	private final JButton searchButton;
+	private final JTable versesTable;
 
-    private final RootsBO rootsBO;
+	private final RootsBO rootsBO;
 
-    public PL_SingleRoot(RootsBO rootsBO) {
-    	super("Root Search App");
-        this.rootsBO = rootsBO;
+	public PL_SingleRoot(RootsBO rootsBO) {
+		super("Root Search App");
+		this.rootsBO = rootsBO;
+		// setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setSize(400, 300);
+		setLayout(new BorderLayout());
 
-        // Set up the JFrame
-     //   setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 300);
-        setLayout(new BorderLayout());
+		rootTextField = new JTextField(20);
+		searchButton = new JButton("Search Root");
+		versesTable = new JTable();
+		JPanel topPanel = new JPanel();
+		topPanel.setLayout(new FlowLayout());
+		topPanel.add(new JLabel("Search Root:"));
+		topPanel.add(rootTextField);
+		topPanel.add(searchButton);
 
-        // Create components
-        rootTextField = new JTextField(20);
-        searchButton = new JButton("Search Root");
-        versesTable = new JTable();
+		add(topPanel, BorderLayout.NORTH);
+		add(new JScrollPane(versesTable), BorderLayout.CENTER);
 
-        // Add components to the JFrame
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new FlowLayout());
-        topPanel.add(new JLabel("Search Root:"));
-        topPanel.add(rootTextField);
-        topPanel.add(searchButton);
+		searchButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String root = rootTextField.getText();
+				List<String> versesList = showRootDataa(root);
+				updateTable(versesList);
+			}
+		});
+	}
 
-        add(topPanel, BorderLayout.NORTH);
-        add(new JScrollPane(versesTable), BorderLayout.CENTER);
+	public List<String> showRootDataa(String root) {
+		return rootsBO.showRootDataa(root);
+	}
 
-        // Add action listener to the search button
-        searchButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String root = rootTextField.getText();
-                List<String> versesList = showRootDataa(root);
-                updateTable(versesList);
-            }
-        });
-    }
+	private void updateTable(List<String> versesList) {
+		DefaultTableModel model = new DefaultTableModel();
+		model.addColumn("Verses");
 
-    // BLL method
-    public List<String> showRootDataa(String root) {
-        return rootsBO.showRootDataa(root);
-    }
+		for (String verse : versesList) {
+			model.addRow(new Object[] { verse });
+		}
 
-    // Update the JTable with the list of verses
-    private void updateTable(List<String> versesList) {
-        DefaultTableModel model = new DefaultTableModel();
-        model.addColumn("Verses");
+		versesTable.setModel(model);
+	}
 
-        for (String verse : versesList) {
-            model.addRow(new Object[]{verse});
-        }
-
-        versesTable.setModel(model);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                // Create an instance of Roots_BO and pass it to PL_SingleRoot
-                RootsBO rootsBO = new RootsBO(new DAL.DataLayerRoots());
-                new PL_SingleRoot(rootsBO).setVisible(true);
-            }
-        });
-    }
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				RootsBO rootsBO = new RootsBO(new DAL.DataLayerRoots());
+				new PL_SingleRoot(rootsBO).setVisible(true);
+			}
+		});
+	}
 }

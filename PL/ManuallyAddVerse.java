@@ -1,6 +1,4 @@
 package PL;
-
-
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -14,12 +12,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import BLL.Import_BO;
-import DAL.DataLayerImport;
-import DAL.Import_Interface;
+import BLL.ManualAddBO;
+import DAL.ManualAddDataLayer;
+import DAL.ManualAddInterface;
 
-public class Presentation_layer extends JFrame {
-    private Import_BO importBO;
+public class ManuallyAddVerse extends JFrame {
+    private ManualAddBO importBO;
 
     private JTextField bookTitleField;
     private JTextField authorField;
@@ -28,12 +26,12 @@ public class Presentation_layer extends JFrame {
     private JTextField versesField;
     private JButton importButton;
 
-    public Presentation_layer(Import_BO importBO) {
+    public ManuallyAddVerse(ManualAddBO importBO) {
         this.importBO = importBO;
 
         setTitle("Data Import");
         setSize(400, 250);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(6, 2));
@@ -49,7 +47,7 @@ public class Presentation_layer extends JFrame {
         JLabel versesLabel = new JLabel("Verses:");
         versesField = new JTextField(20);
 
-        importButton = new JButton("Import Data");
+        importButton = new JButton("Add Verse to Book");
 
         panel.add(bookTitleLabel);
         panel.add(bookTitleField);
@@ -80,18 +78,17 @@ public class Presentation_layer extends JFrame {
         String[] verses = versesField.getText().split("---");
 
         importBO.importData(bookTitle, author, yearPublished, poemTitle, verses);
-        JOptionPane.showMessageDialog(this, "Data imported successfully.");
+        JOptionPane.showMessageDialog(this, "Verses Data Added successfully.");
     }
 
     public static void main(String[] args) {
-        Import_Interface DAO = new DataLayerImport();
-        Import_BO importBO = new Import_BO(DAO);
+        ManualAddInterface DAO = new ManualAddDataLayer();
+        ManualAddBO importBO = new ManualAddBO(DAO);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new Presentation_layer(importBO).setVisible(true);
+                new ManuallyAddVerse(importBO).setVisible(true);
             }
         });
     }
 }
-//GUI

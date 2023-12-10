@@ -1,7 +1,6 @@
 package PL;
 
 import java.awt.BorderLayout;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -25,19 +24,14 @@ public class PL_Roots extends JFrame {
         super("Root Management System");
 
         rootsBO = new RootsBO(new DataLayerRoots());
-
-        // Set up the JFrame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
         setLayout(new BorderLayout());
-
-        // Create buttons for each functionality
         JButton addSingleRootButton = new JButton("Add Single Root");
         JButton singleRootSearchButton = new JButton("Single Root Search");
         JButton updateSingleRootButton = new JButton("Update Single Root");
         JButton viewAllRootsButton = new JButton("View All Roots");
 
-        // Add action listeners to the buttons
         addSingleRootButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -65,18 +59,14 @@ public class PL_Roots extends JFrame {
                 new PL_ViewAll(rootsBO).setVisible(true);
             }
         });
-
-        // Create a panel for the buttons
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(addSingleRootButton);
         buttonPanel.add(singleRootSearchButton);
         buttonPanel.add(updateSingleRootButton);
         buttonPanel.add(viewAllRootsButton);
 
-        // Add the panel to the JFrame
         add(buttonPanel, BorderLayout.CENTER);
 
-        // Make the JFrame visible
         setVisible(true);
     }
 

@@ -46,10 +46,9 @@ public class MainGUI extends JFrame {
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(welcomeLabel, BorderLayout.NORTH);
         mainPanel.setBackground(new Color(0, 0, 0, 0));
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 4)); // Changed to a single row layout
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH); // Moved to the bottom
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 4));
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Adjusted button creation to reduce size
         JButton booksButton = createStyledButton("BOOKS", Color.cyan, 14);
         JButton rootsButton = createStyledButton("ROOTS", Color.cyan, 14);
         JButton poemsButton = createStyledButton("ADD POEMS", Color.cyan, 12);
@@ -102,7 +101,6 @@ public class MainGUI extends JFrame {
     }
     
     private void openTokenPanel() {
-        // Implementation for opening token panel
         TokenPLOverall.AddToken.main(new String[0]);
     }
     private void openDataImportPanel() {

@@ -1,6 +1,5 @@
 package BLL;
 
-
 import DAL.addSingleRootDAL;
 
 import java.util.List;
@@ -8,16 +7,18 @@ import java.util.List;
 public class addSingleRootBLL {
     private addSingleRootDAL rootDAL;
 
+    public void setRootDAL(addSingleRootDAL rootDAL) {
+        this.rootDAL = rootDAL;
+    }
+
     public List<String> getSelectedSuggestedRoots(int[] selectedRows) {
         return rootDAL.getSelectedSuggestedRoots(selectedRows);
     }
 
-    
     public List<String> getSuggestedRoots(String verse) {
         return rootDAL.suggestedRoots(verse);
     }
 
-    
     public addSingleRootBLL() {
         this.rootDAL = new addSingleRootDAL();
     }
@@ -41,5 +42,4 @@ public class addSingleRootBLL {
     public void addRootsToTokens(List<String> tokens, String root) {
         rootDAL.addRootsToTokens(tokens, root);
     }
-    //class to add single roots
 }

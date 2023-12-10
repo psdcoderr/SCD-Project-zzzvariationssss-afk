@@ -10,13 +10,11 @@ import java.io.File;
 import java.util.List;
 
 import javax.swing.Box;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -25,7 +23,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -33,7 +30,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
 import BLL.PoemBO;
-import BLL.TokenBO;
 import DAL.DataLayerPoemDB;
 import DAL.PoemInterface;
 import DTO.BooksDTO;
@@ -78,7 +74,7 @@ public class PL_Poems extends JFrame {
                 | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-        
+
         JMenuBar menuBar = createMenuBar();
         setJMenuBar(menuBar);
 
@@ -91,14 +87,19 @@ public class PL_Poems extends JFrame {
         bookTable = new JTable();
         bookTableModel = new DefaultTableModel();
         bookTable.setModel(bookTableModel);
+        bookTableModel.addColumn("Book Title");
+        bookTableModel.addColumn("Author");
+        bookTableModel.addColumn("Year Passed");
         JScrollPane bookScrollPane = new JScrollPane(bookTable);
         bookPanel.add(bookScrollPane);
+        bookTable.setVisible(true);
 
         poemTable = new JTable();
         poemTableModel = new DefaultTableModel();
         poemTable.setModel(poemTableModel);
         JScrollPane poemScrollPane = new JScrollPane(poemTable);
         poemPanel.add(poemScrollPane);
+        poemTable.setVisible(true);
 
         JLabel filenameLabel = new JLabel("File Name:");
         filenameField = new JTextField(20);
@@ -123,8 +124,9 @@ public class PL_Poems extends JFrame {
         updatedPoemField = new JTextField(20);
 
         poemPanel.add(createHorizontalBox(filenameLabel, filenameField, browseButton, parseButton));
-        poemPanel.add(createHorizontalBox(bookTitleLabel, bookTitleField, authorLabel, authorField, yearPassedLabel,
-                yearPassedField));
+        poemPanel.add(
+                createHorizontalBox(bookTitleLabel, bookTitleField, authorLabel, authorField, yearPassedLabel,
+                        yearPassedField));
         poemPanel.add(createHorizontalBox(viewAllPoemsButton, viewSinglePoemField, viewSinglePoemButton));
         poemPanel.add(createHorizontalBox(updatePoemTitleField, updatedPoemField, updatePoemButton, deletePoemButton));
 
@@ -144,6 +146,7 @@ public class PL_Poems extends JFrame {
 
         add(poemPanel, BorderLayout.NORTH);
         add(poemParserPanel, BorderLayout.CENTER);
+        add(bookPanel, BorderLayout.SOUTH);
 
         customizeComponents();
 
@@ -189,6 +192,7 @@ public class PL_Poems extends JFrame {
                 parsePoemsParser();
             }
         });
+
         viewAllBooksButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 viewAllBooks();
@@ -277,7 +281,8 @@ public class PL_Poems extends JFrame {
                     viewAllPoems(); // Refresh the view after deletion
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    JOptionPane.showMessageDialog(this, "Error deleting the poem.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Error deleting the poem.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             }
         } else {
@@ -286,7 +291,6 @@ public class PL_Poems extends JFrame {
     }
 
     private void customizeComponents() {
-
         bookTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         bookTable.setGridColor(Color.BLACK);
         bookTable.setShowGrid(true);
@@ -308,7 +312,6 @@ public class PL_Poems extends JFrame {
         viewAllBooksButton.setBackground(new Color(255, 165, 0));
         viewAllBooksButton.setForeground(Color.BLACK);
         viewAllBooksButton.setFont(new Font("Arial", Font.PLAIN, 14));
-
     }
 
     private void parseAndAddPoems() {

@@ -2,6 +2,7 @@ package BLL;
 
 import DAL.TokenDAL;
 
+
 import java.util.List;
 
 public class TokenBO {
@@ -10,12 +11,15 @@ public class TokenBO {
     public TokenBO() {
         this.tokenDAL = new TokenDAL();
     }
-//Getting all verses
+
     public List<String> getAllVerses() {
         return tokenDAL.getAllVerses();
     }
-//Add token on verses
+
     public void addNewToken(String verse, String token) {
         tokenDAL.addNewToken(verse, token);
     }
+
+
 }
+ 

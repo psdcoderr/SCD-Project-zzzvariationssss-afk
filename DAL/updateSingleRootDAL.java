@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import DB.DbConnection;
+
 public class updateSingleRootDAL {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
     private static final String DB_USER = "root";
@@ -15,7 +17,7 @@ public class updateSingleRootDAL {
 
     public List<String> getAllVerses() {
         List<String> allVerses = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DbConnection.getConnection()) {
             String selectQuery = "SELECT verse FROM Verses";
             try (PreparedStatement getVerses = connection.prepareStatement(selectQuery)) {
                 try (ResultSet resultSet = getVerses.executeQuery()) {
@@ -33,7 +35,7 @@ public class updateSingleRootDAL {
 
     public List<String> getTokensForVerses(List<String> verses) {
         List<String> tokens = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DbConnection.getConnection()) {
             String selectQuery = "SELECT token FROM Tokens WHERE v_id IN (SELECT v_id FROM Verses WHERE verse = ?)";
             try (PreparedStatement getTokens = connection.prepareStatement(selectQuery)) {
                 for (String verse : verses) {
@@ -80,7 +82,7 @@ public class updateSingleRootDAL {
 
     public List<String> getRootsForSelectedVerses(List<String> verses) {
         List<String> roots = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DbConnection.getConnection()){
             String selectQuery = "SELECT root FROM Roots WHERE t_id IN (SELECT t_id FROM Tokens WHERE v_id IN (SELECT v_id FROM Verses WHERE verse = ?))";
             try (PreparedStatement getRoots = connection.prepareStatement(selectQuery)) {
                 for (String verse : verses) {
@@ -101,7 +103,7 @@ public class updateSingleRootDAL {
 
     public List<String> getRootsForToken(String token) {
         List<String> roots = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DbConnection.getConnection()){
             int tokenId = getTokenId(token, connection);
             if (tokenId != -1) {
                 String selectQuery = "SELECT root FROM Roots WHERE t_id = ?";
@@ -123,7 +125,7 @@ public class updateSingleRootDAL {
 
     
     public void addRootsToTokens(List<String> tokens, String root) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+    	try (Connection connection = DbConnection.getConnection()){
             String insertQuery = "INSERT INTO Roots (t_id, root) VALUES (?, ?)";
             try (PreparedStatement addRootStatement = connection.prepareStatement(insertQuery)) {
                 for (String token : tokens) {
@@ -139,7 +141,7 @@ public class updateSingleRootDAL {
 
     
     public void updateRoot(String oldRoot, String newRoot) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+    	try (Connection connection = DbConnection.getConnection()){
             String updateQuery = "UPDATE Roots SET root = ? WHERE root = ?";
             try (PreparedStatement updateRootStatement = connection.prepareStatement(updateQuery)) {
                 updateRootStatement.setString(1, newRoot);
@@ -166,7 +168,7 @@ public class updateSingleRootDAL {
 
     public List<String> getAllTokens() {
         List<String> allTokens = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = DbConnection.getConnection()){
             String selectQuery = "SELECT token FROM Tokens";
             try (PreparedStatement getTokens = connection.prepareStatement(selectQuery)) {
                 try (ResultSet resultSet = getTokens.executeQuery()) {

@@ -1,16 +1,13 @@
 package DAL;
 
 import java.sql.Connection;
-
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import DB.DbConnection;
+
 public class addRootDal {
 
-	private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
-	private static final String DB_USER = "root";
-	private static final String DB_PASSWORD = "";
 	public void addrootfortoken(int t_id,String root)
 	{
 		String suggested = ManualSuggestRoot(root);
@@ -26,7 +23,7 @@ public class addRootDal {
 	}
 
 	public void addNewRootInDB(int t_id, String root) {
-	    try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection connection = DbConnection.getConnection()) {
 	        String insertQuery = "INSERT INTO Roots (t_id, root) VALUES (?, ?)";
 	        try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
 	            preparedStatement.setInt(1, t_id);
@@ -52,5 +49,4 @@ public class addRootDal {
 		
 		return root;
 	}
-	//RootDal
 }

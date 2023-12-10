@@ -2,6 +2,8 @@ package DAL;
 
 import java.util.List;
 
+import DTO.BooksDTO;
+
 public interface DBInterfaceFacade {
     void addData(String btitle, String a, String yp);
     boolean checkBook(String bname);

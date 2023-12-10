@@ -1,7 +1,6 @@
 package DAL;
 
 import java.sql.Connection;
-
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,10 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import DB.DbConnection;
 import DTO.BooksDTO;
 
-public class DataLayerRoots implements Roots_Interface 
-{
+public class DataLayerRoots implements Roots_Interface {
 	private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
 	private static final String DB_USER = "root";
 	private static final String DB_PASSWORD = "";
@@ -23,7 +22,7 @@ public class DataLayerRoots implements Roots_Interface
 
 	@Override
 	public void addRoot(String root, int t_id) {
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection connection = DbConnection.getConnection()) {
 			String insertQuery = "INSERT INTO Roots (root,t_id) VALUES (?,?)";
 			try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
 				preparedStatement.setString(1, root);
@@ -39,7 +38,7 @@ public class DataLayerRoots implements Roots_Interface
 
 	@Override
 	public boolean checkRoot(String rName) {
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection connection = DbConnection.getConnection()) {
 			String selectQuery = "SELECT root FROM Roots WHERE root = ?";
 			try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
 				preparedStatement.setString(1, rName);
@@ -56,7 +55,7 @@ public class DataLayerRoots implements Roots_Interface
 
 	@Override
 	public void updateRoot(String root, String newRoot) {
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection connection = DbConnection.getConnection()) {
 			String updateQuery = "UPDATE Roots SET root = ? WHERE root = ?";
 			try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
 				preparedStatement.setString(1, newRoot);
@@ -71,7 +70,7 @@ public class DataLayerRoots implements Roots_Interface
 
 	@Override
 	public void deleteRoot(String root) {
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection connection = DbConnection.getConnection()){
 			String deleteQuery = "DELETE FROM Roots WHERE root = ?";
 			try (PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
 				preparedStatement.setString(1, root);
@@ -88,7 +87,7 @@ public class DataLayerRoots implements Roots_Interface
 	public Map<Integer, String> showAllRoots() {
 		Map<Integer, String> Allrootdata = new HashMap<>();
 
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection connection = DbConnection.getConnection()){
 			String selectQuery = "SELECT r.root, COUNT(v.v_id) AS verseCount " + "FROM Roots r "
 					+ "LEFT JOIN Tokens t ON r.t_id = t.t_id " + "LEFT JOIN Verses v ON t.v_id = v.v_id "
 					+ "GROUP BY r.root";
@@ -112,7 +111,7 @@ public class DataLayerRoots implements Roots_Interface
 	public List<String> showRootData(String root) {
 		List<String> versesList = new ArrayList<>();
 
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection connection = DbConnection.getConnection()){
 			// Get all root IDs associated with the given root text
 			String rootIdsQuery = "SELECT r_id FROM Roots WHERE root = ?";
 			try (PreparedStatement rootIdsStatement = connection.prepareStatement(rootIdsQuery)) {
@@ -137,7 +136,7 @@ public class DataLayerRoots implements Roots_Interface
 	public List<String> VersesforSingleRoot(int rootId) {
 		List<String> versesList = new ArrayList<>();
 
-		try (Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+		try (Connection con = DbConnection.getConnection()) {
 			String verseQuery = "SELECT v.verse " + "FROM Verses v " + "JOIN Tokens t ON v.v_id = t.v_id "
 					+ "JOIN Roots r ON t.t_id = r.t_id " + "WHERE r.r_id = ?";
 
@@ -172,22 +171,25 @@ public class DataLayerRoots implements Roots_Interface
 	}
 
 	public void createRoots(Map<Integer, String> newmap) {
+		try (Connection connection = DbConnection.getConnection()) {
+	        for (Map.Entry<Integer, String> entry : newmap.entrySet()) {
+	            Integer verseId = entry.getKey();
+	            String words = entry.getValue();
 
-		try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+	            String[] rootsArray = net.oujda_nlp_team.AlKhalil2Analyzer.getInstance().processToken(words)
+	                    .getAllRootString().split("[-:]");
 
-			for (Map.Entry<Integer, String> entry : newmap.entrySet()) {
-				Integer verseId = entry.getKey();
-				String words = entry.getValue();
+	            for (String root : rootsArray) {
+	                root = root.trim();
 
-				String root = net.oujda_nlp_team.AlKhalil2Analyzer.getInstance().processToken(words).getAllRootString();
-				root = root.replaceAll("[-:]", "").trim();
-
-				if (!root.isEmpty()) {
-					addRootAuto(root, verseId, connection);
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	                if (!root.isEmpty()) {
+	                    addRootAuto(root, verseId, connection);
+	                }
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
 	}
+
 }

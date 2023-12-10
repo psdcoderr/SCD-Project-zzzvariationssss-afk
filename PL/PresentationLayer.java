@@ -163,6 +163,7 @@ public class PresentationLayer extends JFrame {
         }
     }
 
+
     
     private void addBook() {
         String title = addTitleField.getText();
@@ -192,7 +193,7 @@ public class PresentationLayer extends JFrame {
         String searchTerm = searchField.getText().toLowerCase();
 
         tableModel.setRowCount(0);
-        List<BooksDTO> booksList = businessLayer.ShowAllBooks();
+        List<BooksDTO> booksList = businessLayer.showAllBooks();
         for (BooksDTO book : booksList) {
             if (book.getTitle().toLowerCase().contains(searchTerm)
                     || book.getAuthor().toLowerCase().contains(searchTerm)
@@ -206,7 +207,7 @@ public class PresentationLayer extends JFrame {
     private void populateTable() {
         tableModel.setRowCount(0);
 
-        List<BooksDTO> booksList = businessLayer.ShowAllBooks();
+        List<BooksDTO> booksList = businessLayer.showAllBooks();
         for (BooksDTO book : booksList) {
             Object[] rowData = {book.getTitle(), book.getAuthor(), book.getYearPassed(), "Update", "Delete"};
             tableModel.addRow(rowData);
@@ -220,7 +221,6 @@ public class PresentationLayer extends JFrame {
     }
 
 
-    // ButtonRenderer and ButtonEditor classes for handling button actions in JTable
     class ButtonRenderer extends JButton implements TableCellRenderer {
         public ButtonRenderer() {
             setOpaque(true);
@@ -251,7 +251,6 @@ public class PresentationLayer extends JFrame {
             });
         }
 
-        //Both functions to design JTable Columns.
         public Component getTableCellEditorComponent(JTable table, Object value,
                                                      boolean isSelected, int row, int column) {
             if (isSelected) {
@@ -287,8 +286,6 @@ public class PresentationLayer extends JFrame {
             return label;
         }
 
-
-        //Update Book
         private void updateBook(String title) {
         
             BooksDTO existingBook = businessLayer.showSingleBook(title);
@@ -330,12 +327,10 @@ public class PresentationLayer extends JFrame {
             updateFrame.setVisible(true);
         }
 
-
-        //Delete Book
         private void deleteBook(String title) {
             int option = JOptionPane.showConfirmDialog(PresentationLayer.this, "Are you sure you want to delete the book '" + title + "'?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
             if (option == JOptionPane.YES_OPTION) {
-                businessLayer.delBook(title);
+                businessLayer.deleteBook(title);
                 populateTable();
             }
         }
