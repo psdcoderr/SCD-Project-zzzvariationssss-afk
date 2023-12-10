@@ -1,20 +1,20 @@
 package DAL;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import DB.DbConnection;
 
 public class updateSingleRootDAL {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "";
 
+	private static final Logger logger = Logger.getLogger(DataLayerPoemDB.class.getName());
     public List<String> getAllVerses() {
         List<String> allVerses = new ArrayList<>();
         try (Connection connection = DbConnection.getConnection()) {
@@ -28,6 +28,7 @@ public class updateSingleRootDAL {
                 }
             }
         } catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error getting Verses", e);
             e.printStackTrace();
         }
         return allVerses;
@@ -49,6 +50,7 @@ public class updateSingleRootDAL {
                 }
             }
         } catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error getting tokens", e);
             e.printStackTrace();
         }
         return tokens;
@@ -96,6 +98,7 @@ public class updateSingleRootDAL {
                 }
             }
         } catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error getting root", e);
             e.printStackTrace();
         }
         return roots;
@@ -118,6 +121,7 @@ public class updateSingleRootDAL {
                 }
             }
         } catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error getting roots", e);
             e.printStackTrace();
         }
         return roots;
@@ -135,6 +139,7 @@ public class updateSingleRootDAL {
                 }
             }
         } catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error adding roots", e);
             e.printStackTrace();
         }
     }
@@ -149,6 +154,7 @@ public class updateSingleRootDAL {
                 updateRootStatement.executeUpdate();
             }
         } catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error updating root", e);
             e.printStackTrace();
         }
     }
@@ -179,6 +185,7 @@ public class updateSingleRootDAL {
                 }
             }
         } catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error getting tokens", e);
             e.printStackTrace();
         }
         return allTokens;

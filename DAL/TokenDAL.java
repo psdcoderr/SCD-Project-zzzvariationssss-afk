@@ -1,17 +1,18 @@
 package DAL;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import DB.DbConnection;
 
 public class TokenDAL {
-
+	private static final Logger logger = Logger.getLogger(DataLayerPoemDB.class.getName());
     public List<String> getAllVerses() {
         List<String> allVerses = new ArrayList<>();
         try (Connection connection = DbConnection.getConnection()) {
@@ -25,6 +26,7 @@ public class TokenDAL {
                 }
             }
         } catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error getting verses", e);
             e.printStackTrace();
         }
         return allVerses;
@@ -43,6 +45,7 @@ public class TokenDAL {
                 }
             }
         } catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error getting verse Id", e);
             e.printStackTrace();
         }
         return vId;
@@ -59,6 +62,7 @@ public class TokenDAL {
                     statement.executeUpdate();
                 }
             } catch (SQLException e) {
+    			logger.log(Level.SEVERE, "Error adding token", e);
                 e.printStackTrace();
             }
         }
