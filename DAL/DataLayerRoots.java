@@ -1,24 +1,19 @@
 package DAL;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import DB.DbConnection;
-import DTO.BooksDTO;
 
 public class DataLayerRoots implements Roots_Interface {
-	private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
-	private static final String DB_USER = "root";
-	private static final String DB_PASSWORD = "";
-
+	private static final Logger logger = Logger.getLogger(DataLayerPoemDB.class.getName());
 
 	@Override
 	public void addRoot(String root, int t_id) {
@@ -30,11 +25,11 @@ public class DataLayerRoots implements Roots_Interface {
 				preparedStatement.executeUpdate();
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error adding root", e);
 			e.printStackTrace();
 		}
 	}
 
-//This is add funtion of Roots
 
 	@Override
 	public boolean checkRoot(String rName) {
@@ -47,11 +42,11 @@ public class DataLayerRoots implements Roots_Interface {
 				}
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error finding root", e);
 			e.printStackTrace();
 			return false;
 		}
 	}
-	// This is check function of roots
 
 	@Override
 	public void updateRoot(String root, String newRoot) {
@@ -63,10 +58,11 @@ public class DataLayerRoots implements Roots_Interface {
 				preparedStatement.executeUpdate();
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error updating root", e);
 			e.printStackTrace();
 		}
 	}
-	// This is updateRoots func
+
 
 	@Override
 	public void deleteRoot(String root) {
@@ -77,10 +73,9 @@ public class DataLayerRoots implements Roots_Interface {
 				preparedStatement.executeUpdate();
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error deleting root", e);
 			e.printStackTrace();
 		}
-		// this is deletion of roots
-
 	}
 
 	@Override
@@ -101,6 +96,7 @@ public class DataLayerRoots implements Roots_Interface {
 				}
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error getting root", e);
 			e.printStackTrace();
 		}
 
@@ -112,7 +108,6 @@ public class DataLayerRoots implements Roots_Interface {
 		List<String> versesList = new ArrayList<>();
 
 		try (Connection connection = DbConnection.getConnection()){
-			// Get all root IDs associated with the given root text
 			String rootIdsQuery = "SELECT r_id FROM Roots WHERE root = ?";
 			try (PreparedStatement rootIdsStatement = connection.prepareStatement(rootIdsQuery)) {
 				rootIdsStatement.setString(1, root);
@@ -120,7 +115,6 @@ public class DataLayerRoots implements Roots_Interface {
 				try (ResultSet rootIdsResultSet = rootIdsStatement.executeQuery()) {
 					while (rootIdsResultSet.next()) {
 						int rootId = rootIdsResultSet.getInt("r_id");
-						// Call VersesforSingleRoot with each rootId
 						List<String> versesForSingleRoot = VersesforSingleRoot(rootId);
 						versesList.addAll(versesForSingleRoot);
 					}
@@ -151,15 +145,13 @@ public class DataLayerRoots implements Roots_Interface {
 				}
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error getting root", e);
 			e.printStackTrace();
 		}
 
 		return versesList;
 	}
 
-	// Roots creator code:
-
-	// for initial tokenize.
 	public void addRootAuto(String root, int t_id, Connection connection) throws SQLException {
 		String insertQuery = "INSERT INTO Roots (root, t_id) VALUES (?, ?)";
 		try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
@@ -188,6 +180,7 @@ public class DataLayerRoots implements Roots_Interface {
 	            }
 	        }
 	    } catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error creating root", e);
 	        e.printStackTrace();
 	    }
 	}
