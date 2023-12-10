@@ -18,18 +18,14 @@ import DB.DbConnection;
 import DTO.BooksDTO;
 
 public class DataLayerPoemDB implements PoemInterface {
-	private static final String DB_URL = "jdbc:mysql://localhost:3306/project";
-	private static final String DB_USER = "root";
-	private static final String DB_PASSWORD = "";
 
 	DataLayerDB BookDAO = new DataLayerDB();
 
 	public DataLayerPoemDB() {
 	}
 
-	// Adding Data by original Files.
 	@Override
-	public void addData(String btitle, String a, String yp) {
+	public void addNewBook(String btitle, String a, String yp) {
 		BookDAO.addData(btitle, a, yp);
 	}
 
@@ -77,35 +73,40 @@ public class DataLayerPoemDB implements PoemInterface {
 	}
 
 	@Override
-	public int bookcheckk() {
+	public int CheckOrAddNewBook() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Enter Book Name you want to add poems to:");
-		String bname = sc.nextLine();
+		String bookName = sc.nextLine();
 		System.out.println("Enter Author Name:");
-		String aname = sc.nextLine();
-
-		String btitle;
+		String authorName = sc.nextLine();
+	
+		 
+		String bookTitle;
 		String author;
-		String Yearpassed;
-
-		int bookId = CheckBookk(bname, aname);
+		 
+		String yearPassed;
+ 
+		int bookId = getExistingBookID(bookName, authorName);
 
 		if (bookId == -1) {
 			System.out.println("Book Not Available.\nAdd Book First");
 			System.out.println("Enter Book title:");
-			btitle = sc.nextLine();
+			bookTitle = sc.nextLine();
 			System.out.println("Enter Author:");
 			author = sc.nextLine();
 			System.out.println("Enter Passing date:");
-			Yearpassed = sc.nextLine();
-			addData(btitle, author, Yearpassed);
-			bookId = CheckBookk(btitle, author);
+			yearPassed = sc.nextLine();
+			 
+			addNewBook(bookTitle, author, yearPassed);
+			 d
+			bookId = getExistingBookID(bookTitle, author);
 		}
 		return bookId;
 	}
 
+	 d
 	@Override
-	public int CheckBookk(String title, String author) {
+	public int getExistingBookID(String title, String author) {
 		int bookId = -1;
 		try (Connection con = DbConnection.getConnection()) {
 			String selectQuery = "SELECT b_id FROM Books WHERE b_title = ? AND author = ?";
@@ -126,47 +127,58 @@ public class DataLayerPoemDB implements PoemInterface {
 		return bookId;
 	}
 
-	// Till here Book add and Check Functions.
+	  start
 	@Override
 	public int insertPoem(String title, int bookId) {
-		int poemId = getPoemIdByTitleAndBook1(title, bookId);
-		if (poemId == -1) {
-			try (Connection con = DbConnection.getConnection())  {
-				String insertPoemQuery = "INSERT INTO Poems (b_id, p_title) VALUES (?, ?)";
-				try (PreparedStatement poemStatement = con.prepareStatement(insertPoemQuery,
-						PreparedStatement.RETURN_GENERATED_KEYS)) {
-					poemStatement.setInt(1, bookId);
-					poemStatement.setString(2, title);
-					poemStatement.executeUpdate();
-
-					ResultSet generatedKeys = poemStatement.getGeneratedKeys();
-					if (generatedKeys.next()) {
-						poemId = generatedKeys.getInt(1);
-					}
-				}
-
-				String insertVerseQuery = "INSERT INTO Verses (verse, p_id) VALUES (?, ?)";
-				try (PreparedStatement verseStatement = con.prepareStatement(insertVerseQuery)) {
-					String[] verses = title.split("\\.\\.\\.");
-					verseStatement.setString(1, verses[0].trim());
-					verseStatement.setInt(2, poemId);
-					verseStatement.executeUpdate();
-
-					if (verses.length > 1) {
-						verseStatement.setString(1, verses[1].trim());
-						verseStatement.setInt(2, poemId);
-						verseStatement.executeUpdate();
-					}
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		return poemId;
+	    int poemId = getPoemIdByTitleAndBook1(title, bookId);
+	    if (poemId == -1) {
+	        try (Connection con = DbConnection.getConnection())  {
+	            poemId = insertPoemIntoTable(con, title, bookId);
+	            insertParsedVersesIntoTable(con, title, poemId);
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+	    return poemId;
 	}
 
+	private int insertPoemIntoTable(Connection con, String title, int bookId) throws SQLException {
+	    int poemId = -1;
+	    String insertPoemQuery = "INSERT INTO Poems (b_id, p_title) VALUES (?, ?)";
+	    try (PreparedStatement poemStatement = con.prepareStatement(insertPoemQuery,
+	            PreparedStatement.RETURN_GENERATED_KEYS)) {
+	        poemStatement.setInt(1, bookId);
+	        poemStatement.setString(2, title);
+	        poemStatement.executeUpdate();
+
+	        ResultSet generatedKeys = poemStatement.getGeneratedKeys();
+	        if (generatedKeys.next()) {
+	            poemId = generatedKeys.getInt(1);
+	        }
+	    }
+	    return poemId;
+	}
+
+	private void insertParsedVersesIntoTable(Connection con, String title, int poemId) throws SQLException {
+	    String insertVerseQuery = "INSERT INTO Verses (verse, p_id) VALUES (?, ?)";
+	    try (PreparedStatement verseStatement = con.prepareStatement(insertVerseQuery)) {
+	        String[] verses = title.split("\\.\\.\\.");
+	        verseStatement.setString(1, verses[0].trim());
+	        verseStatement.setInt(2, poemId);
+	        verseStatement.executeUpdate();
+
+	        if (verses.length > 1) {
+	            verseStatement.setString(1, verses[1].trim());
+	            verseStatement.setInt(2, poemId);
+	            verseStatement.executeUpdate();
+	        }
+	    }
+	}
+  end. Long function code smell removed!
+	
+ 
 	@Override
-	public void insertVerse(String text, int poemId) {
+	public void insertVerseManually(String text, int poemId) {
 		try (Connection con = DbConnection.getConnection()) {
 			String insertQuery = "INSERT INTO Verses (verse, p_id) VALUES (?, ?)";
 			try (PreparedStatement statement = con.prepareStatement(insertQuery)) {
@@ -186,7 +198,7 @@ public class DataLayerPoemDB implements PoemInterface {
 		String tempVerse1 = "";
 		String tempVerse2 = "";
 
-		int book_id = bookcheckk();
+		int book_id = CheckOrAddNewBook();
 		// has all verses.
 		List<String> parsedVerses = new ArrayList<>();
 
@@ -215,12 +227,12 @@ public class DataLayerPoemDB implements PoemInterface {
 
 								int poemId = insertPoem(poemTitle, book_id);
 								if (poemId != -1) {
-									insertVerse(tempVerse1, poemId);
+									insertVerseManually(tempVerse1, poemId);
 									parsedVerses.add(tempVerse1);
 
 									if (vp.length > 1) {
 										tempVerse2 = vp[1].trim();
-										insertVerse(tempVerse2, poemId);
+										insertVerseManually(tempVerse2, poemId);
 										parsedVerses.add(tempVerse2);
 									}
 								}
@@ -239,7 +251,6 @@ public class DataLayerPoemDB implements PoemInterface {
 		return parsedVerses;
 	}
 
-	// see if needed or not.
 	@Override
 	public List<BooksDTO> showAllBooks() {
 		List<BooksDTO> allBooksData = new ArrayList<>();
@@ -262,7 +273,6 @@ public class DataLayerPoemDB implements PoemInterface {
 		return allBooksData;
 	}
 
-	// tokenize
 	public void tokenize() {
 
 		Map<Integer, String> allVersesWithIds = getAllVersesWithIds();
@@ -432,7 +442,7 @@ public class DataLayerPoemDB implements PoemInterface {
 	}
 
 	@Override
-	   public List<String> viewSinglePoem(String title) {
+   public List<String> viewSinglePoem(String title) {
 	       List<String> verses = new ArrayList<>();
 	       try (Connection con = DbConnection.getConnection()) {
 	           int bookId = CheckBookByNameAndAuthor(title, "");
@@ -454,21 +464,24 @@ public class DataLayerPoemDB implements PoemInterface {
 	       }
 	       return verses;
 	}
+	
+	 
 	@Override
-	public List<String> insertPoems(List<String> poems, String bookTitle, String author, String yearPassed) {
+	public List<String> insertPoemsManually(List<String> poems, String bookTitle, String author, String yearPassed) {
 	    List<String> verseList = new ArrayList<>();
 	    int bookId = CheckBookByNameAndAuthor(bookTitle, author);
 
 	    if (bookId == -1) {
-	        addData(bookTitle, author, yearPassed);
+	    	 
+	        addNewBook(bookTitle, author, yearPassed);
 	        bookId = CheckBookByNameAndAuthor(bookTitle, author);
 	    }
 
 	    for (String poem : poems) {
 	        int poemId = insertPoem(poem, bookId);
 	        if (poemId != -1) {
-	            insertVerse(poem, poemId);
-	            verseList.add(poem); // Add the string directly
+	            insertVerseManually(poem, poemId);
+	            verseList.add(poem);
 	        }
 	    }
 	    return verseList;
