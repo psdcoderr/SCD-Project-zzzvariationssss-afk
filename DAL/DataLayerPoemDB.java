@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import DB.DbConnection;
 import DTO.BooksDTO;
 
@@ -21,9 +23,11 @@ public class DataLayerPoemDB implements PoemInterface {
 
 	DataLayerDB BookDAO = new DataLayerDB();
 
+	private static final Logger logger = Logger.getLogger(DataLayerPoemDB.class.getName());
 	public DataLayerPoemDB() {
 	}
 
+	//renamed removed comment.
 	@Override
 	public void addNewBook(String btitle, String a, String yp) {
 		BookDAO.addData(btitle, a, yp);
@@ -42,10 +46,10 @@ public class DataLayerPoemDB implements PoemInterface {
 					}
 				}
 			} catch (SQLException e) {
-				e.printStackTrace();
+				logger.log(Level.SEVERE, "Error getting poem ID by title and book ID", e);
 			}
 		} catch (SQLException e1) {
-			e1.printStackTrace();
+			logger.log(Level.SEVERE, "Error getting poem ID by title and book ID", e1);
 		}
 		return poemId;
 	}
@@ -64,14 +68,15 @@ public class DataLayerPoemDB implements PoemInterface {
 					}
 				}
 			} catch (SQLException e) {
-				e.printStackTrace();
+				logger.log(Level.SEVERE, "Error checking book by name and author", e);
 			}
 		} catch (SQLException e1) {
-			e1.printStackTrace();
+			logger.log(Level.SEVERE, "Error checking book by name and author", e1);
 		}
 		return bookId;
 	}
 
+	//change
 	@Override
 	public int CheckOrAddNewBook() {
 		Scanner sc = new Scanner(System.in);
@@ -80,12 +85,12 @@ public class DataLayerPoemDB implements PoemInterface {
 		System.out.println("Enter Author Name:");
 		String authorName = sc.nextLine();
 	
-		 
+		//change
 		String bookTitle;
 		String author;
-		 
+		//change
 		String yearPassed;
- 
+//change
 		int bookId = getExistingBookID(bookName, authorName);
 
 		if (bookId == -1) {
@@ -96,15 +101,15 @@ public class DataLayerPoemDB implements PoemInterface {
 			author = sc.nextLine();
 			System.out.println("Enter Passing date:");
 			yearPassed = sc.nextLine();
-			 
+			//change
 			addNewBook(bookTitle, author, yearPassed);
-			 d
+			//changed
 			bookId = getExistingBookID(bookTitle, author);
 		}
 		return bookId;
 	}
 
-	 d
+	//changed
 	@Override
 	public int getExistingBookID(String title, String author) {
 		int bookId = -1;
@@ -120,14 +125,16 @@ public class DataLayerPoemDB implements PoemInterface {
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
+				logger.log(Level.SEVERE, "Error getting book by name and author", e);
 			}
 		} catch (SQLException e1) {
+			logger.log(Level.SEVERE, "Error getting book by name and author", e1);
 			e1.printStackTrace();
 		}
 		return bookId;
 	}
 
-	  start
+	//Change start
 	@Override
 	public int insertPoem(String title, int bookId) {
 	    int poemId = getPoemIdByTitleAndBook1(title, bookId);
@@ -137,6 +144,7 @@ public class DataLayerPoemDB implements PoemInterface {
 	            insertParsedVersesIntoTable(con, title, poemId);
 	        } catch (SQLException e) {
 	            e.printStackTrace();
+				logger.log(Level.SEVERE, "Error Inserting Poem", e);
 	        }
 	    }
 	    return poemId;
@@ -174,9 +182,9 @@ public class DataLayerPoemDB implements PoemInterface {
 	        }
 	    }
 	}
-  end. Long function code smell removed!
+//change end. Long function code smell removed!
 	
- 
+//change
 	@Override
 	public void insertVerseManually(String text, int poemId) {
 		try (Connection con = DbConnection.getConnection()) {
@@ -187,6 +195,7 @@ public class DataLayerPoemDB implements PoemInterface {
 				statement.executeUpdate();
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error Inserting verse", e);
 			e.printStackTrace();
 		}
 	}
@@ -242,9 +251,11 @@ public class DataLayerPoemDB implements PoemInterface {
 				}
 				tokenize();
 			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Error parsing poems", e);
 				e.printStackTrace();
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error parsing poems", e);
 			e.printStackTrace();
 		}
 
@@ -268,6 +279,7 @@ public class DataLayerPoemDB implements PoemInterface {
 				}
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error Showing Books", e);
 			e.printStackTrace();
 		}
 		return allBooksData;
@@ -295,6 +307,7 @@ public class DataLayerPoemDB implements PoemInterface {
 			}
 
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error tokenizing", e);
 			e.printStackTrace();
 		}
 
@@ -328,6 +341,7 @@ public class DataLayerPoemDB implements PoemInterface {
 				}
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error getting tokens", e);
 			e.printStackTrace();
 		}
 		return allTokens;
@@ -347,6 +361,7 @@ public class DataLayerPoemDB implements PoemInterface {
 				}
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error getting verses", e);
 			e.printStackTrace();
 		}
 		return allVerses;
@@ -366,6 +381,7 @@ public class DataLayerPoemDB implements PoemInterface {
 				}
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error getting all verses", e);
 			e.printStackTrace();
 		}
 		return allVerses;
@@ -383,6 +399,7 @@ public class DataLayerPoemDB implements PoemInterface {
 				Updatevals.executeUpdate();
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error updating book", e);
 			e.printStackTrace();
 		}
 	}
@@ -397,6 +414,7 @@ public class DataLayerPoemDB implements PoemInterface {
 			}
 		} else {
 			System.out.println("Book with new details already exists.");
+			logger.log(Level.SEVERE, "Error . Book Exists");
 		}
 	}
 
@@ -417,6 +435,7 @@ public class DataLayerPoemDB implements PoemInterface {
 					deleteBookStatement.executeUpdate();
 				}
 			} catch (SQLException e) {
+				logger.log(Level.SEVERE, "Error Book not found", e);
 				e.printStackTrace();
 			}
 		} else {
@@ -436,6 +455,7 @@ public class DataLayerPoemDB implements PoemInterface {
 				}
 			}
 		} catch (SQLException e) {
+			logger.log(Level.SEVERE, "Error Poems not recieved", e);
 			e.printStackTrace();
 		}
 		return poems;
@@ -460,19 +480,20 @@ public class DataLayerPoemDB implements PoemInterface {
 	               System.out.println("Poem not found.");
 	           }
 	       } catch (SQLException e) {
+				logger.log(Level.SEVERE, "Error poem not found", e);
 	           e.printStackTrace();
 	       }
 	       return verses;
 	}
 	
-	 
+	//change
 	@Override
 	public List<String> insertPoemsManually(List<String> poems, String bookTitle, String author, String yearPassed) {
 	    List<String> verseList = new ArrayList<>();
 	    int bookId = CheckBookByNameAndAuthor(bookTitle, author);
 
 	    if (bookId == -1) {
-	    	 
+	    	//change
 	        addNewBook(bookTitle, author, yearPassed);
 	        bookId = CheckBookByNameAndAuthor(bookTitle, author);
 	    }
