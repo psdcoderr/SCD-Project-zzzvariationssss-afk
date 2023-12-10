@@ -6,13 +6,13 @@ import DTO.BooksDTO;
 
 public interface PoemInterface {
 
-	public void addData(String btitle, String a, String yp);
+	public void addNewBook(String btitle, String a, String yp);
 
 	public int insertPoem(String title, int bookId);
 
-	public void insertVerse(String text, int poemId);
+	public void insertVerseManually(String text, int poemId);
 
-	public int CheckBookk(String title, String author);
+	public int getExistingBookID(String title, String author);
 
 	public List<String> ParsePoems(String fileName);
 
@@ -30,9 +30,9 @@ public interface PoemInterface {
 
 	public List<String> viewSinglePoem(String title);
 
-	public List<String> insertPoems(List<String> poems, String bookTitle, String author, String yearPassed);
+	public List<String> insertPoemsManually(List<String> poems, String bookTitle, String author, String yearPassed);
 
-	int bookcheckk();
+	int CheckOrAddNewBook();
 
 	List<String> getAllVerses();
 

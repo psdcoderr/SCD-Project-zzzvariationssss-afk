@@ -22,7 +22,7 @@ public class PoemBO {
 
 	public List<String> addData(String filename, String bookTitle, String author, String yearPassed) {
 		List<String> poems = DAO.ParsePoems(filename);
-		List<String> verseList = DAO.insertPoems(poems, bookTitle, author, yearPassed);
+		List<String> verseList = DAO.insertPoemsManually(poems, bookTitle, author, yearPassed);
 		return verseList;
 	}
 
