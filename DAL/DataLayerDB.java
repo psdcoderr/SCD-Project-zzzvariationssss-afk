@@ -11,54 +11,61 @@ import java.util.List;
 
 import DB.DbConnection;
 import DTO.BooksDTO;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DataLayerDB implements DBInterfaceFacade {
 
+    private static final Logger logger = Logger.getLogger(DataLayerDB.class.getName());
+    
 	@Override
-	public void addData(String btitle, String a, String yp) {
+    public void addData(String bookTitle, String author, String yearPassed){
 		try (Connection connection = DbConnection.getConnection()) {
 			String insertIntoTable = "INSERT INTO books (b_title, author, yp) VALUES (?, ?, ?)";
 			//update
 			try (PreparedStatement ValsforExecution = connection.prepareStatement(insertIntoTable)) {
-				ValsforExecution.setString(1, btitle);
-				ValsforExecution.setString(2, a);
-				ValsforExecution.setString(3, yp);
+                ValsforExec.setString(1, bookTitle);
+                ValsforExec.setString(2, author);
+                ValsforExec.setString(3, yearPassed);
 				ValsforExecution.executeUpdate();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+            logger.log(Level.SEVERE, "Error adding data to the database", e);
 		}
 	}
 
 	@Override
-	public boolean checkBook(String bname) {
+    public boolean checkBook(String bookName) {
 		try (Connection connection = DbConnection.getConnection()) {
 			String selectQuery = "SELECT b_title FROM books WHERE b_title = ?";
 			try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
-				preparedStatement.setString(1, bname);
+				preparedStatement.setString(1, bookName);
 				try (ResultSet resultSet = preparedStatement.executeQuery()) {
 					return resultSet.next();
 				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+            logger.log(Level.SEVERE, "Error checking book in the database", e);
 			return false;
 		}
 	}
 
 	@Override
-	public void updateBook(String btitle, String ubtitle, String a, String yp) {
+    public void updateBook(String bookTitle, String updatedBookTitle, String author, String yearPassed) {
 		try (Connection connection = DbConnection.getConnection()) {
 			String updateQuery = "UPDATE books SET b_title = ?, author = ?, yp = ? WHERE b_title = ?";
 			try (PreparedStatement Updatevals = connection.prepareStatement(updateQuery)) {
-				Updatevals.setString(1, ubtitle);
-				Updatevals.setString(2, a);
-				Updatevals.setString(3, yp);
-				Updatevals.setString(4, btitle);
+                Updatevals.setString(1, updatedBookTitle);
+                Updatevals.setString(2, author);
+                Updatevals.setString(3, yearPassed);
+                Updatevals.setString(4, bookTitle);
 				Updatevals.executeUpdate();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+            logger.log(Level.SEVERE, "Error updating book in the database", e);
 		}
 	}
 
@@ -72,6 +79,7 @@ public class DataLayerDB implements DBInterfaceFacade {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+            logger.log(Level.SEVERE, "Error deleting book from the database", e);
 		}
 	}
 
@@ -115,6 +123,7 @@ public class DataLayerDB implements DBInterfaceFacade {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+            logger.log(Level.SEVERE, "Error retrieving all books from the database", e);
 		}
 		return bookDetail;
 	}
@@ -150,6 +159,7 @@ public class DataLayerDB implements DBInterfaceFacade {
 	        return allPoems;
 	    } catch (SQLException e) {
 	        e.printStackTrace();
+            logger.log(Level.SEVERE, "Error retrieving poems from the database", e);
 	        return Collections.emptyList();
 	    }
 	}
